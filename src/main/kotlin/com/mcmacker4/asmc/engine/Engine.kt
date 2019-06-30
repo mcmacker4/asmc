@@ -1,13 +1,14 @@
 package com.mcmacker4.asmc.engine
 
-import com.mcmacker4.asmc.event.KeyEvent
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL11.*
 
 
 object Engine {
     
-    fun start() {
+    fun start(callback: () -> Unit) {
         
         GLFWErrorCallback.createPrint(System.err).set()
         
@@ -16,16 +17,16 @@ object Engine {
         
         Window.open()
         
-        var times = 0
-
-        Window.addListener {
-            if (it is KeyEvent && it.key == GLFW_KEY_F && it.action == GLFW_PRESS) {
-                Window.setFullscreen(!Window.fullscreen)
-            }
-        }
+        GL.createCapabilities()
+        
+        callback.invoke()
+        
+        glClearColor(0.3f, 0.6f, 0.9f, 1.0f)
         
         while (!Window.willClose()) {
             glfwPollEvents()
+            
+            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
             
             Window.update()
         }

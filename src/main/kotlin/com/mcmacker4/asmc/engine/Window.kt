@@ -47,6 +47,10 @@ object Window : EventEmitter<InputEvent>() {
         if (centered) centerWindow()
         
         glfwShowWindow(glfwWindow)
+        
+        glfwMakeContextCurrent(glfwWindow)
+        
+        glfwSwapInterval(0)
     }
     
     fun update() {
