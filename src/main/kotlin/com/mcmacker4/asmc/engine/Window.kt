@@ -1,17 +1,17 @@
 package com.mcmacker4.asmc.engine
 
-import com.mcmacker4.asmc.event.EventEmitter
-import com.mcmacker4.asmc.event.InputEvent
-import com.mcmacker4.asmc.event.KeyEvent
-import com.mcmacker4.asmc.event.MouseButtonEvent
+import com.mcmacker4.asmc.input.Input
+import com.mcmacker4.asmc.input.KeyboardEvent
+import com.mcmacker4.asmc.input.MouseButtonEvent
+import com.mcmacker4.asmc.input.MouseCursorEvent
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.system.MemoryUtil.NULL
 
 
-object Window : EventEmitter<InputEvent>() {
+object Window {
     
-    private val defaultWidth = 1280
-    private val defaultHeight = 720
+    private const val defaultWidth = 1280
+    private const val defaultHeight = 720
     
     var width: Int = defaultWidth
         private set
@@ -41,8 +41,10 @@ object Window : EventEmitter<InputEvent>() {
         glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
         
         glfwSetKeyCallback(glfwWindow, ::onKeyboardEvent)
+        
         glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
         glfwSetWindowSizeCallback(glfwWindow, ::onWindowResize)
+        glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
         
         if (centered) centerWindow()
         
@@ -74,12 +76,17 @@ object Window : EventEmitter<InputEvent>() {
     
     private fun onKeyboardEvent(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
         assert(window == glfwWindow)
-        emit(KeyEvent(key, scancode, action, mods))
+        Input.emit(KeyboardEvent(key, scancode, action, mods))
     }
     
     private fun onMouseButtonEvent(window: Long, button: Int, action: Int, mods: Int) {
         assert(window == glfwWindow)
-        emit(MouseButtonEvent(button, action, mods))
+        Input.emit(MouseButtonEvent(button, action, mods))
+    }
+    
+    private fun onMouseCursorEvent(window: Long, xpos: Double, ypos: Double) {
+        assert(window == glfwWindow)
+        Input.emit(MouseCursorEvent(xpos, ypos))
     }
     
     private fun centerWindow() {
@@ -148,5 +155,8 @@ object Window : EventEmitter<InputEvent>() {
         fullscreen = value
         updateFullscreen()
     }
+    
+    fun toggleFullscreen() =
+        setFullscreen(!fullscreen)
     
 }
