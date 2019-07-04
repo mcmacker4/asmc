@@ -17,12 +17,6 @@ fun main() {
             }
         }
         
-        Input.addKeyboardListener {
-            if (action == GLFW_PRESS)
-                //Should not print F key because it gets consumed in the other listener
-                println(glfwGetKeyName(key, scancode))
-        }
-        
     }
     
 }

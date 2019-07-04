@@ -5,21 +5,21 @@ import com.mcmacker4.asmc.input.KeyboardEvent
 import com.mcmacker4.asmc.input.MouseButtonEvent
 import com.mcmacker4.asmc.input.MouseCursorEvent
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GLUtil
+import org.lwjgl.system.Callback
 import org.lwjgl.system.MemoryUtil.NULL
 
 
 object Window {
     
-    private const val defaultWidth = 1280
-    private const val defaultHeight = 720
-    
-    var width: Int = defaultWidth
+    var width = 0
         private set
     
-    var height: Int = defaultHeight
+    var height = 0
         private set
     
-    var title: String = "Another Shitty Minecraft Clone"
+    lateinit var title: String
         private set
     
     var fullscreen = false
@@ -27,9 +27,18 @@ object Window {
     
     private var glfwWindow: Long = NULL
     
-    fun open(centered: Boolean = true) {
+    private var lastW = 0
+    private var lastH = 0
+    
+    private var debugProc: Callback? = null
+    
+    fun open(width: Int, height: Int, title: String, centered: Boolean = true) {
         if (glfwWindow != NULL)
             throw IllegalStateException("A window already exists.")
+        
+        this.width = width
+        this.height = height
+        this.title = title
         
         glfwDefaultWindowHints()
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
@@ -38,12 +47,14 @@ object Window {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
         
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
+        
         glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
+
+        glfwSetWindowSizeCallback(glfwWindow, ::onWindowResize)
         
         glfwSetKeyCallback(glfwWindow, ::onKeyboardEvent)
-        
         glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
-        glfwSetWindowSizeCallback(glfwWindow, ::onWindowResize)
         glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
         
         if (centered) centerWindow()
@@ -51,6 +62,9 @@ object Window {
         glfwShowWindow(glfwWindow)
         
         glfwMakeContextCurrent(glfwWindow)
+        GL.createCapabilities()
+        
+        debugProc = GLUtil.setupDebugMessageCallback()
         
         glfwSwapInterval(0)
     }
@@ -61,6 +75,7 @@ object Window {
 
     fun close() {
         glfwDestroyWindow(glfwWindow)
+        debugProc?.free()
         glfwWindow = NULL
     }
 
@@ -112,6 +127,8 @@ object Window {
     private fun updateFullscreen() {
         if (fullscreen) {
             val monitor = glfwGetPrimaryMonitor()
+            lastW = width
+            lastH = height
             glfwGetVideoMode(monitor)?.let {
                 glfwSetWindowMonitor(
                     glfwWindow,
@@ -126,10 +143,10 @@ object Window {
                 glfwSetWindowMonitor(
                     glfwWindow,
                     NULL,
-                    (it.width() - defaultWidth) / 2,
-                    (it.height() - defaultHeight) / 2,
-                    defaultWidth,
-                    defaultHeight,
+                    (it.width() - lastW) / 2,
+                    (it.height() - lastH) / 2,
+                    lastW,
+                    lastH,
                     GLFW_DONT_CARE
                 )
             }
