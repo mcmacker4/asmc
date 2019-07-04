@@ -22,12 +22,21 @@ class VAO private constructor(id: Int) : GLObject(id) {
     
     override fun delete() {
         glDeleteVertexArrays(id)
+        vaos.remove(id)
     }
 
     companion object {
         
-        fun create() =
-            VAO(glGenVertexArrays())
+        private val vaos = arrayListOf<Int>()
+        
+        fun create() : VAO = glGenVertexArrays().let {
+            vaos.add(it)
+            return VAO(it)
+        }
+        
+        fun cleanup() {
+            vaos.forEach { glDeleteVertexArrays(it) }
+        }
         
     }
     

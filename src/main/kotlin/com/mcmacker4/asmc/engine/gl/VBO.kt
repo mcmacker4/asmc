@@ -29,23 +29,31 @@ class VBO private constructor(id: Int, private val target: Int) : GLObject(id) {
 
     override fun delete() {
         glDeleteBuffers(id)
+        vbos.remove(id)
     }
 
     companion object {
         
+        private val vbos = arrayListOf<Int>()
         private val boundBuffers = hashMapOf<Int, Int>()
         
         fun array(data: FloatArray) =
             VBO(glGenBuffers(), GL_ARRAY_BUFFER).apply {
                 bind()
                 write(data)
+                vbos.add(id)
             }
         
         fun indices(data: IntArray) =
             VBO(glGenBuffers(), GL_ELEMENT_ARRAY_BUFFER).apply {
                 bind()
                 write(data)
+                vbos.add(id)
             }
+        
+        fun cleanup() {
+            vbos.forEach { glDeleteBuffers(it) }
+        }
         
     }
     

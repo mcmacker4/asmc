@@ -6,6 +6,7 @@ import com.mcmacker4.asmc.input.MouseButtonEvent
 import com.mcmacker4.asmc.input.MouseCursorEvent
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL11.glViewport
 import org.lwjgl.opengl.GLUtil
 import org.lwjgl.system.Callback
 import org.lwjgl.system.MemoryUtil.NULL
@@ -43,7 +44,7 @@ object Window {
         glfwDefaultWindowHints()
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API)
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
         
@@ -51,18 +52,18 @@ object Window {
         
         glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
 
-        glfwSetWindowSizeCallback(glfwWindow, ::onWindowResize)
-        
-        glfwSetKeyCallback(glfwWindow, ::onKeyboardEvent)
-        glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
-        glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
-        
         if (centered) centerWindow()
         
         glfwShowWindow(glfwWindow)
         
         glfwMakeContextCurrent(glfwWindow)
         GL.createCapabilities()
+
+        glfwSetWindowSizeCallback(glfwWindow, ::onWindowResize)
+
+        glfwSetKeyCallback(glfwWindow, ::onKeyboardEvent)
+        glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
+        glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
         
         debugProc = GLUtil.setupDebugMessageCallback()
         
@@ -87,6 +88,7 @@ object Window {
         assert(window == glfwWindow)
         this.width = width
         this.height = height
+        glViewport(0, 0, width, height)
     }
     
     private fun onKeyboardEvent(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {

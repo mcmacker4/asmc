@@ -16,14 +16,18 @@ class Shader private constructor(id: Int) : GLObject(id) {
     
     companion object {
         
-        fun createVertex(source: String) : Shader {
-            val id  = glCreateShader(GL_VERTEX_SHADER)
+        private fun create(source: String, type: Int) : Shader {
+            val id  = glCreateShader(type)
             glShaderSource(id, source)
             glCompileShader(id)
             if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE)
                 throw ShaderCompileException(glGetShaderInfoLog(id))
             return Shader(id)
         }
+        
+        fun createVertex(source: String) = create(source, GL_VERTEX_SHADER)
+        
+        fun createFragment(source: String) = create(source, GL_FRAGMENT_SHADER)
         
     }
 
