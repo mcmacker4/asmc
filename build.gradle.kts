@@ -1,8 +1,15 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.internal.os.OperatingSystem
 
 val lwjglVersion = "3.1.6"
 val jomlVersion = "1.9.13"
-val lwjglNatives = "natives-windows"
+
+val lwjglNatives = when (OperatingSystem.current()) {
+    OperatingSystem.LINUX   -> "natives-linux"
+    OperatingSystem.MAC_OS  -> "natives-macos"
+    OperatingSystem.WINDOWS -> "natives-windows"
+    else -> throw Error("Unrecognized or unsupported Operating system. Please set \"lwjglNatives\" manually")
+}
 
 plugins {
     java
