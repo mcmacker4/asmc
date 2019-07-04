@@ -12,6 +12,10 @@ import org.lwjgl.opengl.GL11.*
 
 object Engine {
     
+    fun stop() {
+        Window.close()
+    }
+    
     fun start(callback: Engine.() -> Unit) {
         
         GLFWErrorCallback.createPrint(System.err).set()
@@ -60,6 +64,8 @@ object Engine {
         
         val program = Program.create(vShader, fShader)
         
+        println(glGetString(GL_VENDOR))
+        
         while (!Window.willClose()) {
             glfwPollEvents()
             
@@ -74,7 +80,7 @@ object Engine {
         VAO.cleanup()
         VBO.cleanup()
         
-        Window.close()
+        Window.destroy()
         
     }
     

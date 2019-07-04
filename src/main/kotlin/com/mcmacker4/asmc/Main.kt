@@ -11,9 +11,17 @@ fun main() {
     Engine.start {
         
         Input.addKeyboardListener {
-            if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-                Window.toggleFullscreen()
-                consume()
+            if (action == GLFW_RELEASE) {
+                when (key) {
+                    GLFW_KEY_F11 -> {
+                        Window.toggleFullscreen()
+                        consume()
+                    }
+                    GLFW_KEY_ESCAPE -> {
+                        stop()
+                        consume()
+                    }
+                }
             }
         }
         

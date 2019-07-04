@@ -33,7 +33,7 @@ object Window {
     
     private var debugProc: Callback? = null
     
-    fun open(width: Int, height: Int, title: String, centered: Boolean = true) {
+    fun open(width: Int, height: Int, title: String, centered: Boolean = true, fullscreen: Boolean = true) {
         if (glfwWindow != NULL)
             throw IllegalStateException("A window already exists.")
         
@@ -50,11 +50,13 @@ object Window {
         
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
         
-        glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
-
-        if (centered) centerWindow()
-        
-        glfwShowWindow(glfwWindow)
+        if (fullscreen) {
+            val vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor()) ?: throw Exception("VideoMode is null!")
+            glfwWindow = glfwCreateWindow(vidmode.width(), vidmode.height(), title, glfwGetPrimaryMonitor(), NULL)
+        } else {
+            glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
+            if (centered) centerWindow()
+        }
         
         glfwMakeContextCurrent(glfwWindow)
         GL.createCapabilities()
@@ -64,17 +66,24 @@ object Window {
         glfwSetKeyCallback(glfwWindow, ::onKeyboardEvent)
         glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
         glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
-        
+
         debugProc = GLUtil.setupDebugMessageCallback()
         
         glfwSwapInterval(0)
+        
+        glfwShowWindow(glfwWindow)
+        glfwFocusWindow(glfwWindow)
     }
     
     fun update() {
         glfwSwapBuffers(glfwWindow)
     }
-
+    
     fun close() {
+        glfwSetWindowShouldClose(glfwWindow, true)
+    }
+
+    fun destroy() {
         glfwDestroyWindow(glfwWindow)
         debugProc?.free()
         glfwWindow = NULL
