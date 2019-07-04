@@ -23,9 +23,6 @@ object Window {
     lateinit var title: String
         private set
     
-    var fullscreen = false
-        private set
-    
     private var glfwWindow: Long = NULL
     
     private var lastW = 0
@@ -39,6 +36,10 @@ object Window {
         
         this.width = width
         this.height = height
+        
+        this.lastW = width
+        this.lastH = height
+        
         this.title = title
         
         glfwDefaultWindowHints()
@@ -134,35 +135,6 @@ object Window {
         if (glfwWindow != NULL)
             glfwSetWindowTitle(glfwWindow, title)
     }
-    
-    private fun updateFullscreen() {
-        if (fullscreen) {
-            val monitor = glfwGetPrimaryMonitor()
-            lastW = width
-            lastH = height
-            glfwGetVideoMode(monitor)?.let {
-                glfwSetWindowMonitor(
-                    glfwWindow,
-                    if (fullscreen) glfwGetPrimaryMonitor() else NULL,
-                    0, 0,
-                    it.width(), it.height(),
-                    GLFW_DONT_CARE)
-            }
-        } else {
-            val monitor = glfwGetPrimaryMonitor()
-            glfwGetVideoMode(monitor)?.let {
-                glfwSetWindowMonitor(
-                    glfwWindow,
-                    NULL,
-                    (it.width() - lastW) / 2,
-                    (it.height() - lastH) / 2,
-                    lastW,
-                    lastH,
-                    GLFW_DONT_CARE
-                )
-            }
-        }
-    }
 
     fun setWidth(value: Int) {
         width = value
@@ -178,13 +150,37 @@ object Window {
         title = value
         updateTitle()
     }
+    
+    fun isFullscreen() = glfwGetWindowMonitor(glfwWindow) != NULL
 
     fun setFullscreen(value: Boolean) {
-        fullscreen = value
-        updateFullscreen()
+        if (value) {
+            val monitor = glfwGetPrimaryMonitor()
+            val vidmode = glfwGetVideoMode(monitor) ?: throw Exception("Video Mode for Primary Monitor not found.")
+            lastW = width
+            lastH = height
+            glfwSetWindowMonitor(
+                glfwWindow,
+                monitor,
+                0, 0,
+                vidmode.width(), vidmode.height(),
+                GLFW_DONT_CARE)
+        } else {
+            val monitor = glfwGetPrimaryMonitor()
+            val vidmode = glfwGetVideoMode(monitor) ?: throw Exception("Video Mode for Primary Monitor not found.")
+            glfwSetWindowMonitor(
+                glfwWindow,
+                NULL,
+                (vidmode.width() - lastW) / 2,
+                (vidmode.height() - lastH) / 2,
+                lastW,
+                lastH,
+                GLFW_DONT_CARE
+            )
+        }
     }
     
     fun toggleFullscreen() =
-        setFullscreen(!fullscreen)
+        setFullscreen(!isFullscreen())
     
 }
