@@ -4,17 +4,15 @@ import com.mcmacker4.asmc.engine.gl.Program
 import com.mcmacker4.asmc.engine.gl.Shader
 import com.mcmacker4.asmc.engine.gl.VAO
 import com.mcmacker4.asmc.engine.gl.VBO
+import com.mcmacker4.asmc.engine.model.Entity
 import com.mcmacker4.asmc.engine.model.RawModel
+import com.mcmacker4.asmc.engine.render.Renderer
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.GL11.*
 
 
 object Engine {
-    
-    fun stop() {
-        Window.close()
-    }
     
     fun start(callback: Engine.() -> Unit) {
         
@@ -37,6 +35,8 @@ object Engine {
             )
         )
         
+        val entity = Entity(model)
+        
         val vShader = Shader.createVertex("""
             #version 330 core
             
@@ -44,35 +44,43 @@ object Engine {
             
             out vec4 color;
             
+            uniform mat4 modelMatrix;
+            
             void main() {
-                gl_Position = vec4(position, 1.0);
+                gl_Position = modelMatrix * vec4(position, 1.0);
                 color = vec4(position + 0.5, 1.0);
             }
         """.trimIndent())
-        
+
         val fShader = Shader.createFragment("""
             #version 330 core
-            
+
             in vec4 color;
-            
+
             out vec4 FragColor;
-            
+
             void main() {
                 FragColor = color;
             }
         """.trimIndent())
         
-        val program = Program.create(vShader, fShader)
+        Renderer.program = Program.create(vShader, fShader)
         
         println(glGetString(GL_VENDOR))
         
+        var current = System.currentTimeMillis()
+        var last = current
+        
         while (!Window.willClose()) {
-            glfwPollEvents()
+            current = System.currentTimeMillis()
+            val delta = (current - last) / 1000f
+            last = current
             
+            glfwPollEvents()
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
             
-            program.bind()
-            model.render()
+            entity.rotation.y += Math.PI.toFloat() * delta
+            Renderer.render(entity)
             
             Window.update()
         }
@@ -82,6 +90,10 @@ object Engine {
         
         Window.destroy()
         
+    }
+
+    fun stop() {
+        Window.close()
     }
     
 }

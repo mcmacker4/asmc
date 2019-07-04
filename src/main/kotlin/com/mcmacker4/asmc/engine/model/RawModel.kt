@@ -10,6 +10,7 @@ class RawModel private constructor(private val vao: VAO, private val vertexCount
     fun render() {
         vao.bind()
         glDrawArrays(GL_TRIANGLES, 0, vertexCount)
+        vao.unbind()
     }
     
     companion object {

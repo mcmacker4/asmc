@@ -30,7 +30,7 @@ object Window {
     
     private var debugProc: Callback? = null
     
-    fun open(width: Int, height: Int, title: String, centered: Boolean = true, fullscreen: Boolean = true) {
+    fun open(width: Int, height: Int, title: String, centered: Boolean = true, fullscreen: Boolean = false) {
         if (glfwWindow != NULL)
             throw IllegalStateException("A window already exists.")
         

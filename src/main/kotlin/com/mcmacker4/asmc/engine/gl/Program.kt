@@ -4,9 +4,15 @@ import com.mcmacker4.asmc.engine.exceptions.ShaderLinkException
 import com.mcmacker4.asmc.engine.exceptions.ShaderValidateException
 import org.lwjgl.opengl.GL11.GL_FALSE
 import org.lwjgl.opengl.GL20.*
+import java.nio.FloatBuffer
 
 
 class Program private constructor(id: Int) : GLObject(id) {
+    
+    fun uniformMatrix(name: String, matrix: FloatBuffer) {
+        val loc = glGetUniformLocation(id, name)
+        glUniformMatrix4fv(loc, false, matrix)
+    }
     
     override fun bind() {
         glUseProgram(id)
