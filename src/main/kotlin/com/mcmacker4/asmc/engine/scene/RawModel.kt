@@ -1,4 +1,4 @@
-package com.mcmacker4.asmc.engine.model
+package com.mcmacker4.asmc.engine.scene
 
 import com.mcmacker4.asmc.engine.gl.VAO
 import com.mcmacker4.asmc.engine.gl.VBO

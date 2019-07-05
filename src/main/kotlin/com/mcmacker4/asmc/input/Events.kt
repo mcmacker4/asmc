@@ -35,6 +35,6 @@ data class MouseButtonEvent(
 ) : Event()
 
 data class MouseCursorEvent(
-    val xpos: Double,
-    val ypos: Double
+    val dx: Double,
+    val dy: Double
 ) : Event()

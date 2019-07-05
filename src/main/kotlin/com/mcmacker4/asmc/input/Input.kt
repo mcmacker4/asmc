@@ -6,15 +6,47 @@ import org.lwjgl.glfw.GLFW.*
 
 object Input {
     
-    private val keyboardListeners = arrayListOf<EventListener<KeyboardEvent>>()
-    private val mouseCursorListeners = arrayListOf<EventListener<MouseCursorEvent>>()
-    private val mouseButtonListeners = arrayListOf<EventListener<MouseButtonEvent>>()
+    private val keyDownListeners = arrayListOf<EventListener<KeyboardEvent>>()
+    private val keyUpListeners = arrayListOf<EventListener<KeyboardEvent>>()
     
+    private val mouseDownListeners = arrayListOf<EventListener<MouseButtonEvent>>()
+    private val mouseUpListeners = arrayListOf<EventListener<MouseButtonEvent>>()
+    
+    private val mouseCursorListeners = arrayListOf<EventListener<MouseCursorEvent>>()
+    
+    var mouseX: Double
+        private set
+    var mouseY: Double
+        private set
+    
+    init {
+        val xarr = DoubleArray(1)
+        val yarr = DoubleArray(1)
+        glfwGetCursorPos(Window.glfwWindow, xarr, yarr)
+        mouseX = xarr[0]
+        mouseY = yarr[0]
+    }
+
     fun emit(event: Event) {
         when (event) {
-            is KeyboardEvent -> keyboardListeners.invokeAll(event)
-            is MouseCursorEvent -> mouseCursorListeners.invokeAll(event)
-            is MouseButtonEvent -> mouseButtonListeners.invokeAll(event)
+            is KeyboardEvent -> {
+                when (event.action) {
+                    GLFW_PRESS -> keyDownListeners.invokeAll(event)
+                    GLFW_RELEASE -> keyUpListeners.invokeAll(event)
+                }
+            }
+            is MouseButtonEvent -> {
+                when (event.action) {
+                    GLFW_PRESS -> mouseDownListeners.invokeAll(event)
+                    GLFW_RELEASE -> mouseUpListeners.invokeAll(event)
+                }
+            }
+            is MouseCursorEvent -> {
+                val deltaEvent = MouseCursorEvent(event.dx - mouseX, event.dy - mouseY)
+                mouseX = event.dx
+                mouseY = event.dy
+                mouseCursorListeners.invokeAll(deltaEvent)
+            }
         }
     }
     
@@ -32,23 +64,20 @@ object Input {
         GLFW_CURSOR_NORMAL
     )
     
-    fun addKeyboardListener(listener: EventListener<KeyboardEvent>) =
-        keyboardListeners.add(listener)
-
-    fun addMouseCursorListener(listener: EventListener<MouseCursorEvent>) =
+    fun onKeyDown(listener: EventListener<KeyboardEvent>) =
+        keyDownListeners.add(listener)
+    
+    fun onKeyUp(listener: EventListener<KeyboardEvent>) =
+        keyUpListeners.add(listener)
+    
+    fun onMouseDown(listener: EventListener<MouseButtonEvent>) =
+        mouseDownListeners.add(listener)
+    
+    fun onMouseUp(listener: EventListener<MouseButtonEvent>) =
+        mouseUpListeners.add(listener)
+    
+    fun onMouseMoved(listener: EventListener<MouseCursorEvent>) =
         mouseCursorListeners.add(listener)
-
-    fun addMouseButtonListener(listener: EventListener<MouseButtonEvent>) =
-        mouseButtonListeners.add(listener)
-
-    fun removeKeyboardListener(listener: EventListener<KeyboardEvent>) =
-        keyboardListeners.remove(listener)
-
-    fun removeMouseCursorListener(listener: EventListener<MouseCursorEvent>) =
-        mouseCursorListeners.remove(listener)
-
-    fun removeMouseButtonListener(listener: EventListener<MouseButtonEvent>) =
-        mouseButtonListeners.remove(listener)
     
 }
 

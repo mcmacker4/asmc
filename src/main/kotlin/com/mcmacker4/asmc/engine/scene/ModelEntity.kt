@@ -1,4 +1,4 @@
-package com.mcmacker4.asmc.engine.model
+package com.mcmacker4.asmc.engine.scene
 
 
 class ModelEntity(

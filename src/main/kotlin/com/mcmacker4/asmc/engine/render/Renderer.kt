@@ -1,30 +1,36 @@
 package com.mcmacker4.asmc.engine.render
 
 import com.mcmacker4.asmc.engine.gl.Program
-import com.mcmacker4.asmc.engine.model.ModelEntity
-import com.mcmacker4.asmc.engine.view.Camera
+import com.mcmacker4.asmc.engine.scene.ModelEntity
+import com.mcmacker4.asmc.engine.scene.Scene
 
 
 object Renderer {
     
     private var program = Program.load("default")
     
-    val camera = Camera()
-    
-    fun prepare() {
+    private fun prepare(scene: Scene) {
         program.bind()
-        program.uniformMatrix("viewMatrix", camera.getViewMatrix())
-        program.uniformMatrix("projectionMatrix", camera.getProjectionMatrix())
+        scene.camera.let {
+            program.uniformMatrix("viewMatrix", it.getViewMatrix())
+            program.uniformMatrix("projectionMatrix", it.getProjectionMatrix())
+        }
     }
     
-    fun render(entity: ModelEntity) {
-        program.bind()
+    private fun render(entity: ModelEntity) {
         program.uniformMatrix("modelMatrix", entity.getModelMatrix())
         entity.model.render()
-        program.unbind()
     }
     
-    fun finalize() {
+    fun render(scene: Scene) {
+        prepare(scene)
+        scene.modelEntities.forEach {
+            render(it)
+        }
+        finalize()
+    }
+    
+    private fun finalize() {
         program.unbind()
     }
     

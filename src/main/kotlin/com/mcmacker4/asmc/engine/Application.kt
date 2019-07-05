@@ -23,6 +23,9 @@ abstract class Application {
 
         println(glGetString(GL_VENDOR))
         println(glGetString(GL_RENDERER))
+        
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_CULL_FACE)
 
         onInit()
 

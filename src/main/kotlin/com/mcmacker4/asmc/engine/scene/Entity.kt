@@ -1,4 +1,4 @@
-package com.mcmacker4.asmc.engine.model
+package com.mcmacker4.asmc.engine.scene
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
@@ -9,7 +9,8 @@ import java.nio.FloatBuffer
 abstract class Entity(
     val position: Vector3f = Vector3f(),
     val rotation: Vector3f = Vector3f(),
-    val scale: Vector3f = Vector3f(1f)
+    val scale: Vector3f = Vector3f(1f),
+    var onUpdate: ((Float) -> Unit)? = null
 ) {
     
     private val modelMatrixBuffer = MemoryUtil.memAllocFloat(4*4)
@@ -21,6 +22,10 @@ abstract class Entity(
             rotateXYZ(rotation)
             scale(scale)
         }.get(modelMatrixBuffer)
+    }
+    
+    open fun update(delta: Float) {
+        onUpdate?.invoke(delta)
     }
     
 }
