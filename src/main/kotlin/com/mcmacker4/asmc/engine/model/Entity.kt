@@ -6,8 +6,7 @@ import org.lwjgl.system.MemoryUtil
 import java.nio.FloatBuffer
 
 
-class Entity(
-    val model: RawModel,
+abstract class Entity(
     val position: Vector3f = Vector3f(),
     val rotation: Vector3f = Vector3f(),
     val scale: Vector3f = Vector3f(1f)
@@ -18,9 +17,9 @@ class Entity(
     fun getModelMatrix() : FloatBuffer {
         return Matrix4f().apply {
             identity()
-            scale(scale)
-            rotateXYZ(rotation)
             translate(position)
+            rotateXYZ(rotation)
+            scale(scale)
         }.get(modelMatrixBuffer)
     }
     

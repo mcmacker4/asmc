@@ -1,5 +1,8 @@
 package com.mcmacker4.asmc.input
 
+import com.mcmacker4.asmc.engine.Window
+import org.lwjgl.glfw.GLFW.*
+
 
 object Input {
     
@@ -14,6 +17,20 @@ object Input {
             is MouseButtonEvent -> mouseButtonListeners.invokeAll(event)
         }
     }
+    
+    fun isKeyDown(key: Int) = glfwGetKey(Window.glfwWindow, key) == GLFW_PRESS
+    
+    fun grabCursor() = glfwSetInputMode(
+        Window.glfwWindow,
+        GLFW_CURSOR,
+        GLFW_CURSOR_DISABLED
+    )
+    
+    fun releaseCursor() = glfwSetInputMode(
+        Window.glfwWindow,
+        GLFW_CURSOR,
+        GLFW_CURSOR_NORMAL
+    )
     
     fun addKeyboardListener(listener: EventListener<KeyboardEvent>) =
         keyboardListeners.add(listener)

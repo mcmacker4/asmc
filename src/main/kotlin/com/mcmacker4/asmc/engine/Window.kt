@@ -23,7 +23,8 @@ object Window {
     lateinit var title: String
         private set
     
-    private var glfwWindow: Long = NULL
+    var glfwWindow: Long = NULL
+        private set
     
     private var lastW = 0
     private var lastH = 0
@@ -33,6 +34,8 @@ object Window {
     fun open(width: Int, height: Int, title: String, centered: Boolean = true, fullscreen: Boolean = false) {
         if (glfwWindow != NULL)
             throw IllegalStateException("A window already exists.")
+        
+        println("GLFW Initialized")
         
         this.width = width
         this.height = height
@@ -59,6 +62,8 @@ object Window {
             if (centered) centerWindow()
         }
         
+        println("Window created.")
+        
         glfwMakeContextCurrent(glfwWindow)
         GL.createCapabilities()
 
@@ -73,7 +78,6 @@ object Window {
         glfwSwapInterval(0)
         
         glfwShowWindow(glfwWindow)
-        glfwFocusWindow(glfwWindow)
     }
     
     fun update() {
@@ -126,30 +130,20 @@ object Window {
         }
     }
     
-    private fun updateResolution() {
+    private fun updateResolution(width: Int, height: Int) {
+        this.width = width
+        this.height = height
         if (glfwWindow != NULL)
             glfwSetWindowSize(glfwWindow, width, height)
     }
     
-    private fun updateTitle() {
+    private fun updateTitle(title: String) {
+        this.title = title
         if (glfwWindow != NULL)
             glfwSetWindowTitle(glfwWindow, title)
     }
-
-    fun setWidth(value: Int) {
-        width = value
-        updateResolution()
-    }
-
-    fun setHeight(value: Int) {
-        height = value
-        updateResolution()
-    }
-
-    fun setTitle(value: String) {
-        title = value
-        updateTitle()
-    }
+    
+    fun aspect() = width.toFloat() / height
     
     fun isFullscreen() = glfwGetWindowMonitor(glfwWindow) != NULL
 
@@ -180,7 +174,6 @@ object Window {
         }
     }
     
-    fun toggleFullscreen() =
-        setFullscreen(!isFullscreen())
+    fun toggleFullscreen() = setFullscreen(!isFullscreen())
     
 }
