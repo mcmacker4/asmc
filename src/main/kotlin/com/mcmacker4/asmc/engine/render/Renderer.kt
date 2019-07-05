@@ -6,13 +6,13 @@ import com.mcmacker4.asmc.engine.model.Entity
 
 object Renderer {
     
-    var program: Program? = null
+    private var program = Program.load("default")
     
     fun render(entity: Entity) {
-        program?.bind()
-        program?.uniformMatrix("modelMatrix", entity.getModelMatrix())
+        program.bind()
+        program.uniformMatrix("modelMatrix", entity.getModelMatrix())
         entity.model.render()
-        program?.unbind()
+        program.unbind()
     }
     
 }

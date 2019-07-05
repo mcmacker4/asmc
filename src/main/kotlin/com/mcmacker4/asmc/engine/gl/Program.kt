@@ -43,6 +43,13 @@ class Program private constructor(id: Int) : GLObject(id) {
             
             return Program(id)
         }
+
+        fun load(name: String) : Program {
+            return create(
+                Shader.loadVertex(name),
+                Shader.loadFragment(name)
+            )
+        }
         
     }
     
