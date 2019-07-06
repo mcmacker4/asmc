@@ -48,49 +48,23 @@ class ASMC : Application() {
         }
 
         val model = RawModel.create(
+            intArrayOf(
+                6, 4, 0, 6, 0, 2, //North
+                3, 1, 5, 3, 5, 7, //South
+                7, 5, 4, 7, 4, 6, //East
+                2, 0, 1, 2, 1, 3, //West
+                2, 3, 7, 2, 7, 6, //Up
+                1, 0, 4, 1, 4, 5  //Down
+            ),
             floatArrayOf(
-                //North (z-1)
-                1f, 1f, 0f,
-                1f, 0f, 0f,
                 0f, 0f, 0f,
-                1f, 1f, 0f,
-                0f, 0f, 0f,
-                0f, 1f, 0f,
-                //South (z+1)
-                0f, 1f, 1f,
                 0f, 0f, 1f,
+                0f, 1f, 0f,
+                0f, 1f, 1f,
+                1f, 0f, 0f,
                 1f, 0f, 1f,
-                0f, 1f, 1f,
-                1f, 0f, 1f,
-                1f, 1f, 1f,
-                //East (x+1)
-                1f, 1f, 1f,
-                1f, 0f, 1f,
-                1f, 0f, 0f,
-                1f, 1f, 1f,
-                1f, 0f, 0f,
                 1f, 1f, 0f,
-                //West (x-1)
-                0f, 1f, 0f,
-                0f, 0f, 0f,
-                0f, 0f, 1f,
-                0f, 1f, 0f,
-                0f, 0f, 1f,
-                0f, 1f, 1f,
-                //Up (y+1)
-                0f, 1f, 0f,
-                0f, 1f, 1f,
-                1f, 1f, 1f,
-                0f, 1f, 0f,
-                1f, 1f, 1f,
-                1f, 1f, 0f,
-                //Down (y-1)
-                0f, 0f, 1f,
-                0f, 0f, 0f,
-                1f, 0f, 0f,
-                0f, 0f, 1f,
-                1f, 0f, 0f,
-                1f, 0f, 1f
+                1f, 1f, 1f
             )
         )
 

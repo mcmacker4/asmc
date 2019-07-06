@@ -9,22 +9,25 @@ class RawModel private constructor(private val vao: VAO, private val vertexCount
     
     fun render() {
         vao.bind()
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount)
+        //glDrawArrays(GL_TRIANGLES, 0, vertexCount)
+        glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0)
         vao.unbind()
     }
     
     companion object {
         
-        fun create(positions: FloatArray) : RawModel {
+        fun create(indices: IntArray, positions: FloatArray) : RawModel {
             
+            val indicesBuff = VBO.indices(indices)
             val posBuffer = VBO.array(positions)
             
             val vao = VAO.create().apply {
                 bind()
+                indicesBuff.bind()
                 bindAttribute(0, 3, GL_FLOAT, posBuffer)
             }
 
-            return RawModel(vao, positions.size / 3)
+            return RawModel(vao, indices.size)
             
         } 
         
