@@ -14,6 +14,11 @@ class Program private constructor(id: Int) : GLObject(id) {
         glUniformMatrix4fv(loc, false, matrix)
     }
     
+    fun setTextureIndex(name: String, index: Int) {
+        val loc = glGetUniformLocation(id, name)
+        glUniform1i(loc, index)
+    }
+    
     override fun bind() {
         glUseProgram(id)
     }

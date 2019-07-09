@@ -21,7 +21,7 @@ class Camera(
 ) : Entity() {
     
     companion object {
-        private const val speed = 0.8f
+        private const val speed = 1.5f
         private const val sensitivity = 0.003f
     }
     
@@ -64,9 +64,7 @@ class Camera(
             direction.y = 1f
         else if (Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) && !Input.isKeyDown(GLFW_KEY_SPACE))
             direction.y = -1f
-        position += direction.apply {
-            rotateY(rotation.y)
-        } * speed * delta
+        position += direction.rotateY(rotation.y) * speed * delta
     }
     
 }

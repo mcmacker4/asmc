@@ -2,6 +2,7 @@ package com.mcmacker4.asmc
 
 import com.mcmacker4.asmc.engine.Application
 import com.mcmacker4.asmc.engine.Window
+import com.mcmacker4.asmc.engine.gl.Texture
 import com.mcmacker4.asmc.engine.scene.ModelEntity
 import com.mcmacker4.asmc.engine.scene.RawModel
 import com.mcmacker4.asmc.engine.render.Renderer
@@ -48,32 +49,106 @@ class ASMC : Application() {
         }
 
         val model = RawModel.create(
-            intArrayOf(
-                6, 4, 0, 6, 0, 2, //North
-                3, 1, 5, 3, 5, 7, //South
-                7, 5, 4, 7, 4, 6, //East
-                2, 0, 1, 2, 1, 3, //West
-                2, 3, 7, 2, 7, 6, //Up
-                1, 0, 4, 1, 4, 5  //Down
-            ),
             floatArrayOf(
+                //North (z-1)
+                1f, 1f, 0f,
+                1f, 0f, 0f,
+                0f, 0f, 0f,
+                1f, 1f, 0f,
+                0f, 0f, 0f,
+                0f, 1f, 0f,
+                //South (z+1)
+                0f, 1f, 1f,
+                0f, 0f, 1f,
+                1f, 0f, 1f,
+                0f, 1f, 1f,
+                1f, 0f, 1f,
+                1f, 1f, 1f,
+                //East (x+1)
+                1f, 1f, 1f,
+                1f, 0f, 1f,
+                1f, 0f, 0f,
+                1f, 1f, 1f,
+                1f, 0f, 0f,
+                1f, 1f, 0f,
+                //West (x-1)
+                0f, 1f, 0f,
                 0f, 0f, 0f,
                 0f, 0f, 1f,
                 0f, 1f, 0f,
+                0f, 0f, 1f,
                 0f, 1f, 1f,
-                1f, 0f, 0f,
-                1f, 0f, 1f,
+                //Up (y+1)
+                0f, 1f, 0f,
+                0f, 1f, 1f,
+                1f, 1f, 1f,
+                0f, 1f, 0f,
+                1f, 1f, 1f,
                 1f, 1f, 0f,
-                1f, 1f, 1f
-            )
+                //Down (y-1)
+                0f, 0f, 1f,
+                0f, 0f, 0f,
+                1f, 0f, 0f,
+                0f, 0f, 1f,
+                1f, 0f, 0f,
+                1f, 0f, 1f
+            ),
+            floatArrayOf(
+                //North (z-1)
+                0f, 0f,
+                0f, 1f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                1f, 0f,
+                //South (z+1)
+                0f, 0f,
+                0f, 1f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                1f, 0f,
+                //East (x+1)
+                0f, 0f,
+                0f, 1f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                1f, 0f,
+                //West (x-1)
+                0f, 0f,
+                0f, 1f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                1f, 0f,
+                //Up (y+1)
+                0f, 0f,
+                0f, 1f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                1f, 0f,
+                //Down (y-1)
+                0f, 0f,
+                0f, 1f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                1f, 0f
+            ),
+            Texture.load("terrain.png")
         )
 
         val entity = ModelEntity(model).apply {
-            position.set(-0.5f, -0.5f, -0.5f)
+            onUpdate = { delta ->
+                rotation.x += Math.PI.toFloat() * delta
+                rotation.z += Math.PI.toFloat() * delta
+            }
         }
         
         val camera = Camera().apply {
-            position.set(0f, 0f, -3f)
+            position.set(0f, 0f, -1.5f)
             rotation.y = Math.PI.toFloat()
         }
         

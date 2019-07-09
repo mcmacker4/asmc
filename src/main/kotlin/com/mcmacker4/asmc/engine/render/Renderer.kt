@@ -3,6 +3,9 @@ package com.mcmacker4.asmc.engine.render
 import com.mcmacker4.asmc.engine.gl.Program
 import com.mcmacker4.asmc.engine.scene.ModelEntity
 import com.mcmacker4.asmc.engine.scene.Scene
+import org.lwjgl.opengl.GL11.glBindTexture
+import org.lwjgl.opengl.GL13.GL_TEXTURE0
+import org.lwjgl.opengl.GL13.glActiveTexture
 
 
 object Renderer {
@@ -18,7 +21,10 @@ object Renderer {
     }
     
     private fun render(entity: ModelEntity) {
+        program.setTextureIndex("tex", 0)
         program.uniformMatrix("modelMatrix", entity.getModelMatrix())
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(entity.model.texture.target, entity.model.texture.id)
         entity.model.render()
     }
     
