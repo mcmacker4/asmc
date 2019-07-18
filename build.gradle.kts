@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.internal.os.OperatingSystem
 
-val lwjglVersion = "3.1.6"
+val lwjglVersion = "3.2.2"
 val jomlVersion = "1.9.13"
 
 val lwjglNatives = when (OperatingSystem.current()) {

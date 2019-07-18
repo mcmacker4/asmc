@@ -92,7 +92,7 @@ class ASMC : Application() {
                 0f, 0f, 1f,
                 1f, 0f, 0f,
                 1f, 0f, 1f
-            ),
+            ).map { it - 0.5f }.toFloatArray(),
             floatArrayOf(
                 //North (z-1)
                 0f, 0f,
@@ -136,14 +136,14 @@ class ASMC : Application() {
                 0f, 0f,
                 1f, 1f,
                 1f, 0f
-            ),
+            ).map { it / 16 }.toFloatArray(),
             Texture.load("terrain.png")
         )
 
         val entity = ModelEntity(model).apply {
             onUpdate = { delta ->
-                rotation.x += Math.PI.toFloat() * delta
-                rotation.z += Math.PI.toFloat() * delta
+                rotation.y += Math.PI.toFloat() * delta
+                //rotation.z += Math.PI.toFloat() * delta
             }
         }
         
