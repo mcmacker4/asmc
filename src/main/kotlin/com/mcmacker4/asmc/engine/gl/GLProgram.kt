@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL20.*
 import java.nio.FloatBuffer
 
 
-class Program private constructor(id: Int) : GLObject(id) {
+class GLProgram private constructor(id: Int) : GLObject(id) {
     
     fun uniformMatrix(name: String, matrix: FloatBuffer) {
         val loc = glGetUniformLocation(id, name)
@@ -33,7 +33,7 @@ class Program private constructor(id: Int) : GLObject(id) {
     
     companion object {
         
-        fun create(vShader: Shader, fShader: Shader) : Program {
+        fun create(vShader: GLShader, fShader: GLShader) : GLProgram {
             val id = glCreateProgram()
             glAttachShader(id, vShader.id)
             glAttachShader(id, fShader.id)
@@ -46,13 +46,13 @@ class Program private constructor(id: Int) : GLObject(id) {
             if (glGetProgrami(id, GL_VALIDATE_STATUS) == GL_FALSE)
                 throw ShaderValidateException(glGetProgramInfoLog(id))
             
-            return Program(id)
+            return GLProgram(id)
         }
 
-        fun load(name: String) : Program {
+        fun load(name: String) : GLProgram {
             return create(
-                Shader.loadVertex(name),
-                Shader.loadFragment(name)
+                GLShader.loadVertex(name),
+                GLShader.loadFragment(name)
             )
         }
         

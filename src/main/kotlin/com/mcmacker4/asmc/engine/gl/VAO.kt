@@ -1,10 +1,11 @@
 package com.mcmacker4.asmc.engine.gl
 
-import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
 
 
 class VAO private constructor(id: Int) : GLObject(id) {
+    
+    val attributes = hashMapOf<Int, VBO>()
     
     override fun bind() {
         glBindVertexArray(id)
@@ -18,6 +19,7 @@ class VAO private constructor(id: Int) : GLObject(id) {
         buffer.bind()
         glVertexAttribPointer(index, size, type, false, 0, 0)
         glEnableVertexAttribArray(index)
+        attributes[index] = buffer
     }
     
     override fun delete() {
@@ -26,6 +28,9 @@ class VAO private constructor(id: Int) : GLObject(id) {
     }
 
     companion object {
+        
+        const val POSITIONS = 0
+        const val TEXTURE_UVS = 1
         
         private val vaos = arrayListOf<Int>()
         

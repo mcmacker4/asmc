@@ -1,21 +1,27 @@
 package com.mcmacker4.asmc
 
+import com.mcmacker4.asmc.block.Block
+import com.mcmacker4.asmc.block.BlockTexture
+import com.mcmacker4.asmc.block.BlockVertices
 import com.mcmacker4.asmc.engine.Application
 import com.mcmacker4.asmc.engine.Window
-import com.mcmacker4.asmc.engine.gl.Texture
+import com.mcmacker4.asmc.engine.gl.GLTexture
 import com.mcmacker4.asmc.engine.scene.ModelEntity
 import com.mcmacker4.asmc.engine.scene.RawModel
 import com.mcmacker4.asmc.engine.render.Renderer
 import com.mcmacker4.asmc.engine.scene.Scene
 import com.mcmacker4.asmc.engine.view.Camera
 import com.mcmacker4.asmc.input.Input
+import com.mcmacker4.asmc.world.Chunk
+import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
 
 
 class ASMC : Application() {
     
-    lateinit var scene: Scene
+    lateinit var camera: Camera
+    lateinit var chunk: Chunk
 
     override fun onInit() {
         
@@ -47,120 +53,19 @@ class ASMC : Application() {
                 }
             }
         }
-
-        val model = RawModel.create(
-            floatArrayOf(
-                //North (z-1)
-                1f, 1f, 0f,
-                1f, 0f, 0f,
-                0f, 0f, 0f,
-                1f, 1f, 0f,
-                0f, 0f, 0f,
-                0f, 1f, 0f,
-                //South (z+1)
-                0f, 1f, 1f,
-                0f, 0f, 1f,
-                1f, 0f, 1f,
-                0f, 1f, 1f,
-                1f, 0f, 1f,
-                1f, 1f, 1f,
-                //East (x+1)
-                1f, 1f, 1f,
-                1f, 0f, 1f,
-                1f, 0f, 0f,
-                1f, 1f, 1f,
-                1f, 0f, 0f,
-                1f, 1f, 0f,
-                //West (x-1)
-                0f, 1f, 0f,
-                0f, 0f, 0f,
-                0f, 0f, 1f,
-                0f, 1f, 0f,
-                0f, 0f, 1f,
-                0f, 1f, 1f,
-                //Up (y+1)
-                0f, 1f, 0f,
-                0f, 1f, 1f,
-                1f, 1f, 1f,
-                0f, 1f, 0f,
-                1f, 1f, 1f,
-                1f, 1f, 0f,
-                //Down (y-1)
-                0f, 0f, 1f,
-                0f, 0f, 0f,
-                1f, 0f, 0f,
-                0f, 0f, 1f,
-                1f, 0f, 0f,
-                1f, 0f, 1f
-            ).map { it - 0.5f }.toFloatArray(),
-            floatArrayOf(
-                //North (z-1)
-                0f, 0f,
-                0f, 1f,
-                1f, 1f,
-                0f, 0f,
-                1f, 1f,
-                1f, 0f,
-                //South (z+1)
-                0f, 0f,
-                0f, 1f,
-                1f, 1f,
-                0f, 0f,
-                1f, 1f,
-                1f, 0f,
-                //East (x+1)
-                0f, 0f,
-                0f, 1f,
-                1f, 1f,
-                0f, 0f,
-                1f, 1f,
-                1f, 0f,
-                //West (x-1)
-                0f, 0f,
-                0f, 1f,
-                1f, 1f,
-                0f, 0f,
-                1f, 1f,
-                1f, 0f,
-                //Up (y+1)
-                0f, 0f,
-                0f, 1f,
-                1f, 1f,
-                0f, 0f,
-                1f, 1f,
-                1f, 0f,
-                //Down (y-1)
-                0f, 0f,
-                0f, 1f,
-                1f, 1f,
-                0f, 0f,
-                1f, 1f,
-                1f, 0f
-            ).map { it / 16 }.toFloatArray(),
-            Texture.load("terrain.png")
-        )
-
-        val entity = ModelEntity(model).apply {
-            onUpdate = { delta ->
-                rotation.y += Math.PI.toFloat() * delta
-                //rotation.z += Math.PI.toFloat() * delta
-            }
-        }
         
-        val camera = Camera().apply {
+        chunk = Chunk.create()
+        
+        camera = Camera().apply {
             position.set(0f, 0f, -1.5f)
             rotation.y = Math.PI.toFloat()
         }
         
-        scene = Scene(camera).apply {
-            modelEntities.add(entity)
-        }
-
     }
 
     override fun onUpdate(delta: Float) {
-        scene.update(delta)
-        Renderer.render(scene)
+        camera.update(delta)
+        Renderer.render(camera, chunk)
     }
 
     override fun onEnd() {}

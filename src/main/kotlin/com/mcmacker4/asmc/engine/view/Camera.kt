@@ -21,7 +21,7 @@ class Camera(
 ) : Entity() {
     
     companion object {
-        private const val speed = 1.5f
+        private const val speed = 2f
         private const val sensitivity = 0.003f
     }
     
@@ -51,7 +51,7 @@ class Camera(
 
     override fun update(delta: Float) {
         super.update(delta)
-        val direction = Vector3f()
+        var direction = Vector3f()
         if (Input.isKeyDown(GLFW_KEY_A) && !Input.isKeyDown(GLFW_KEY_D))
             direction.x = -1f
         else if (Input.isKeyDown(GLFW_KEY_D) && !Input.isKeyDown(GLFW_KEY_A))
@@ -60,10 +60,14 @@ class Camera(
             direction.z = -1f
         else if (Input.isKeyDown(GLFW_KEY_S) && !Input.isKeyDown(GLFW_KEY_W))
             direction.z = 1f
-        if (Input.isKeyDown(GLFW_KEY_SPACE) && !Input.isKeyDown(GLFW_KEY_LEFT_SHIFT))
+        if (Input.isKeyDown(GLFW_KEY_SPACE) && !Input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
             direction.y = 1f
-        else if (Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) && !Input.isKeyDown(GLFW_KEY_SPACE))
+        else if (Input.isKeyDown(GLFW_KEY_LEFT_CONTROL) && !Input.isKeyDown(GLFW_KEY_SPACE))
             direction.y = -1f
+        
+        if (Input.isKeyDown(GLFW_KEY_LEFT_SHIFT))
+            direction *= 4f
+        
         position += direction.rotateY(rotation.y) * speed * delta
     }
     

@@ -5,10 +5,9 @@ import org.lwjgl.opengl.GL11.*
 import org.lwjgl.stb.STBImage.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
-import java.nio.ByteBuffer
 
 
-class Texture constructor(id: Int, val target: Int) : GLObject(id) {
+class GLTexture constructor(id: Int, val target: Int) : GLObject(id) {
 
     override fun bind() {
         glBindTexture(target, id)
@@ -24,7 +23,7 @@ class Texture constructor(id: Int, val target: Int) : GLObject(id) {
 
     companion object {
         
-        fun load(path: String) : Texture {
+        fun load(path: String) : GLTexture {
             
         val id = glGenTextures()
         glBindTexture(GL_TEXTURE_2D, id)
@@ -32,7 +31,7 @@ class Texture constructor(id: Int, val target: Int) : GLObject(id) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         
-        Texture::class.java.getResourceAsStream("/textures/$path").use { file ->
+        GLTexture::class.java.getResourceAsStream("/textures/$path").use { file ->
             val fileArray = file.readBytes()
             val fileBuffer = MemoryUtil.memAlloc(fileArray.size)
             fileBuffer.put(fileArray).flip()
@@ -60,7 +59,7 @@ class Texture constructor(id: Int, val target: Int) : GLObject(id) {
             }
         }
             
-            return Texture(id, GL_TEXTURE_2D)
+            return GLTexture(id, GL_TEXTURE_2D)
             
         }
         
