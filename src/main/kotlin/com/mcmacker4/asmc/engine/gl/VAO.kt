@@ -30,7 +30,8 @@ class VAO private constructor(id: Int) : GLObject(id) {
     companion object {
         
         const val POSITIONS = 0
-        const val TEXTURE_UVS = 1
+        const val NORMALS = 1
+        const val TEXTURE_UVS = 2
         
         private val vaos = arrayListOf<Int>()
         

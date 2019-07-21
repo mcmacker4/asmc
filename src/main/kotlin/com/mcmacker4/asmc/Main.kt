@@ -13,6 +13,7 @@ import com.mcmacker4.asmc.engine.scene.Scene
 import com.mcmacker4.asmc.engine.view.Camera
 import com.mcmacker4.asmc.input.Input
 import com.mcmacker4.asmc.world.Chunk
+import com.mcmacker4.asmc.world.World
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
@@ -21,8 +22,7 @@ import org.lwjgl.opengl.GL11.*
 class ASMC : Application() {
     
     lateinit var camera: Camera
-    lateinit var chunk: Chunk
-
+    lateinit var world: World
     override fun onInit() {
         
         Input.grabCursor()
@@ -54,7 +54,7 @@ class ASMC : Application() {
             }
         }
         
-        chunk = Chunk.create()
+        world = World()
         
         camera = Camera().apply {
             position.set(0f, 0f, -1.5f)
@@ -65,7 +65,8 @@ class ASMC : Application() {
 
     override fun onUpdate(delta: Float) {
         camera.update(delta)
-        Renderer.render(camera, chunk)
+        world.update(delta)
+        world.render()
     }
 
     override fun onEnd() {}

@@ -6,16 +6,24 @@ import com.mcmacker4.asmc.block.BlockVertices
 import com.mcmacker4.asmc.block.Blocks
 import com.mcmacker4.asmc.engine.gl.VAO
 import com.mcmacker4.asmc.engine.gl.VBO
+import com.mcmacker4.asmc.util.Log
+import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11.*
+import org.lwjgl.system.MemoryUtil
+import java.nio.FloatBuffer
 
 
-class Chunk private constructor(val blocks: Array<BlockID>) {
+class Chunk private constructor(val blocks: Array<BlockID>, val xpos: Int, val zpos: Int) {
     
-    private val vao: VAO
+    val vao: VAO
+    val vertexCount: Int
+    
+    private val mmBuffer: FloatBuffer = MemoryUtil.memAllocFloat(4*4)
     
     init {
         val positions = arrayListOf<Float>()
+        val normals = arrayListOf<Float>()
         val uvs = arrayListOf<Float>()
         repeat(DEPTH) { k ->
             repeat(HEIGHT) { j ->
@@ -24,24 +32,26 @@ class Chunk private constructor(val blocks: Array<BlockID>) {
                     val texture = getBlock(i, j, k).texture
                     if (texture != null) {
                         if (getBlock(i, j + 1, k).translucent)
-                            BlockVertices.addUp(positions, uvs, pos, texture)
+                            BlockVertices.addUp(positions, normals, uvs, pos, texture)
                         if (getBlock(i, j - 1, k).translucent)
-                            BlockVertices.addDown(positions, uvs, pos, texture)
+                            BlockVertices.addDown(positions, normals, uvs, pos, texture)
                         if (getBlock(i, j, k + 1).translucent)
-                            BlockVertices.addNorth(positions, uvs, pos, texture)
+                            BlockVertices.addNorth(positions, normals, uvs, pos, texture)
                         if (getBlock(i, j, k - 1).translucent)
-                            BlockVertices.addSouth(positions, uvs, pos, texture)
+                            BlockVertices.addSouth(positions, normals, uvs, pos, texture)
                         if (getBlock(i - 1, j, k).translucent)
-                            BlockVertices.addEast(positions, uvs, pos, texture)
+                            BlockVertices.addEast(positions, normals, uvs, pos, texture)
                         if (getBlock(i + 1, j, k).translucent)
-                            BlockVertices.addWest(positions, uvs, pos, texture)
+                            BlockVertices.addWest(positions, normals, uvs, pos, texture)
                     }
                 }
             }
         }
+        vertexCount = positions.size / 3
         vao = VAO.create().apply {
             bind()
             bindAttribute(VAO.POSITIONS, 3, GL_FLOAT, VBO.array(positions.toFloatArray()))
+            bindAttribute(VAO.NORMALS, 3, GL_FLOAT, VBO.array(normals.toFloatArray()))
             bindAttribute(VAO.TEXTURE_UVS, 2, GL_FLOAT, VBO.array(uvs.toFloatArray()))
         }
     }
@@ -52,22 +62,38 @@ class Chunk private constructor(val blocks: Array<BlockID>) {
         return Blocks[blocks[x + y * WIDTH + z * WIDTH * HEIGHT]]
     }
     
-    fun render() {
-        vao.bind()
-        glDrawArrays(GL_TRIANGLES, 0, blocks.size * 6 * 6)
-        vao.unbind()
+    fun getModelMatrix(): FloatBuffer {
+        Matrix4f().identity()
+            .translate(xpos * WIDTH.toFloat(), 0f, zpos * DEPTH.toFloat())
+            .get(mmBuffer)
+        return mmBuffer
     }
     
     companion object {
         
-        const val WIDTH = 128
-        const val HEIGHT = 4
-        const val DEPTH = 128
+        const val WIDTH = 8
+        const val HEIGHT = 64
+        const val DEPTH = 8
         
-        fun create() : Chunk {
-            return Chunk(Array(WIDTH * HEIGHT * DEPTH) {
-                (Math.random() * 3).toShort()
-            })
+        private const val FEATURE_SIZE = 24
+        
+        private val noise = OpenSimplexNoise(1)
+        
+        fun create(xpos: Int, zpos: Int) : Chunk {
+            val blocks = Array(WIDTH * HEIGHT * DEPTH) { Blocks.AIR }
+            repeat(WIDTH) { i ->
+                repeat(DEPTH) { k ->
+                    val height = (noise.eval((i + xpos * WIDTH).toDouble() / FEATURE_SIZE, (k + zpos * DEPTH).toDouble() / FEATURE_SIZE) * 6 + 20).toInt()
+                    repeat(HEIGHT) { j ->
+                        blocks[i + j * WIDTH + k * WIDTH * HEIGHT] = when {
+                            j > height -> Blocks.AIR
+                            j == height -> Blocks.GRASS
+                            else -> Blocks.STONE
+                        }
+                    }
+                }
+            }
+            return Chunk(blocks, xpos, zpos)
         }
         
     }

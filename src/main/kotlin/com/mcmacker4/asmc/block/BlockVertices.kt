@@ -18,7 +18,7 @@ object BlockVertices {
         }
     }
     
-    fun addNorth(p: ArrayList<Float>, uv: ArrayList<Float>,  pos: Vector3f, texture: BlockTexture) {
+    fun addNorth(p: ArrayList<Float>, n: ArrayList<Float>, uv: ArrayList<Float>,  pos: Vector3f, texture: BlockTexture) {
         p.apply {
             add(0 + pos.x); add(1 + pos.y); add(1 + pos.z)
             add(0 + pos.x); add(0 + pos.y); add(1 + pos.z)
@@ -28,9 +28,12 @@ object BlockVertices {
             add(1 + pos.x); add(1 + pos.y); add(1 + pos.z)
         }
         addUVs(uv, texture.north)
+        repeat(6) { n.apply {
+            add(0f); add(0f); add(1f)
+        }}
     }
     
-    fun addSouth(p: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
+    fun addSouth(p: ArrayList<Float>, n: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
         p.apply {
             add(1 + pos.x); add(1 + pos.y); add(0 + pos.z)
             add(1 + pos.x); add(0 + pos.y); add(0 + pos.z)
@@ -40,9 +43,12 @@ object BlockVertices {
             add(0 + pos.x); add(1 + pos.y); add(0 + pos.z)
         }
         addUVs(uv, texture.south)
+        repeat(6) { n.apply {
+            add(0f); add(0f); add(-1f)
+        }}
     }
 
-    fun addEast(p: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
+    fun addEast(p: ArrayList<Float>, n: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
         p.apply {
              add(0 + pos.x); add(1 + pos.y); add(0 + pos.z)
              add(0 + pos.x); add(0 + pos.y); add(0 + pos.z)
@@ -52,9 +58,12 @@ object BlockVertices {
              add(0 + pos.x); add(1 + pos.y); add(1 + pos.z)
         }
         addUVs(uv, texture.east)
+        repeat(6) { n.apply {
+            add(-1f); add(0f); add(0f)
+        }}
     }
 
-    fun addWest(p: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
+    fun addWest(p: ArrayList<Float>, n: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
         p.apply {
             add(1 + pos.x); add(1 + pos.y); add(1 + pos.z)
             add(1 + pos.x); add(0 + pos.y); add(1 + pos.z)
@@ -64,9 +73,12 @@ object BlockVertices {
             add(1 + pos.x); add(1 + pos.y); add(0 + pos.z)
         }
         addUVs(uv, texture.west)
+        repeat(6) { n.apply {
+            add(1f); add(0f); add(0f)
+        }}
     }
 
-    fun addUp(p: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
+    fun addUp(p: ArrayList<Float>, n: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
         p.apply {
             add(0 + pos.x); add(1 + pos.y); add(0 + pos.z)
             add(0 + pos.x); add(1 + pos.y); add(1 + pos.z)
@@ -76,9 +88,12 @@ object BlockVertices {
             add(1 + pos.x); add(1 + pos.y); add(0 + pos.z)
         }
         addUVs(uv, texture.up)
+        repeat(6) { n.apply {
+            add(0f); add(1f); add(0f)
+        }}
     }
 
-    fun addDown(p: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
+    fun addDown(p: ArrayList<Float>, n: ArrayList<Float>, uv: ArrayList<Float>, pos: Vector3f, texture: BlockTexture) {
         p.apply {
             add(0 + pos.x); add(0 + pos.y); add(1 + pos.z)
             add(0 + pos.x); add(0 + pos.y); add(0 + pos.z)
@@ -88,6 +103,9 @@ object BlockVertices {
             add(1 + pos.x); add(0 + pos.y); add(1 + pos.z)
         }
         addUVs(uv, texture.down)
+        repeat(6) { n.apply {
+            add(0f); add(-1f); add(0f)
+        }}
     }
     
 }

@@ -5,7 +5,7 @@ import com.mcmacker4.asmc.engine.gl.GLTexture
 import com.mcmacker4.asmc.engine.view.Camera
 import com.mcmacker4.asmc.world.Chunk
 import org.joml.Matrix4f
-import org.lwjgl.opengl.GL11.glBindTexture
+import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
 import org.lwjgl.system.MemoryUtil
@@ -39,30 +39,32 @@ object Renderer {
 //        finalize()
 //    }
     
-    private val mmBuffer = MemoryUtil.memAllocFloat(4*4)
-    private val terrainTexture = GLTexture.load("terrain.png")
-    
-    init {
-        Matrix4f().identity().get(mmBuffer)
-    }
+    private val terrainTexture = GLTexture.load2D("terrain.png")
     
     private fun renderChunk(chunk: Chunk) {
         program.setTextureIndex("tex", 0)
-        program.uniformMatrix("modelMatrix", mmBuffer)
+        program.uniformMatrix("modelMatrix", chunk.getModelMatrix())
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(terrainTexture.target, terrainTexture.id)
-        chunk.render()
+        chunk.vao.bind()
+        glDrawArrays(GL_TRIANGLES, 0, chunk.vertexCount)
+        chunk.vao.unbind()
     }
     
-    fun render(camera: Camera, chunk: Chunk) {
+    fun init() {
         program.bind()
+    }
+    
+    fun setCamera(camera: Camera) {
         program.uniformMatrix("viewMatrix", camera.getViewMatrix())
         program.uniformMatrix("projectionMatrix", camera.getProjectionMatrix())
-        renderChunk(chunk)
-        finalize()
     }
     
-    private fun finalize() {
+    fun render(chunk: Chunk) {
+        renderChunk(chunk)
+    }
+    
+    fun finalize() {
         program.unbind()
     }
     

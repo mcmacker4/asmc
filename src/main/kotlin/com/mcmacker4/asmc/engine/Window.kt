@@ -4,6 +4,7 @@ import com.mcmacker4.asmc.input.Input
 import com.mcmacker4.asmc.input.KeyboardEvent
 import com.mcmacker4.asmc.input.MouseButtonEvent
 import com.mcmacker4.asmc.input.MouseCursorEvent
+import com.mcmacker4.asmc.util.Log
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.glViewport
@@ -35,7 +36,7 @@ object Window {
         if (glfwWindow != NULL)
             throw IllegalStateException("A window already exists.")
         
-        println("GLFW Initialized")
+        Log.log("GLFW Initialized")
         
         this.width = width
         this.height = height
@@ -62,7 +63,7 @@ object Window {
             if (centered) centerWindow()
         }
         
-        println("Window created.")
+        Log.log("Window created.")
         
         glfwMakeContextCurrent(glfwWindow)
         GL.createCapabilities()
@@ -73,7 +74,7 @@ object Window {
         glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
         glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
 
-        debugProc = GLUtil.setupDebugMessageCallback()
+        //debugProc = GLUtil.setupDebugMessageCallback()
         
         glfwSwapInterval(0)
         

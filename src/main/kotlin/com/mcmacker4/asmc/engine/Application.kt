@@ -2,6 +2,7 @@ package com.mcmacker4.asmc.engine
 
 import com.mcmacker4.asmc.engine.gl.VAO
 import com.mcmacker4.asmc.engine.gl.VBO
+import com.mcmacker4.asmc.util.Log
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.GL11.*
@@ -21,8 +22,8 @@ abstract class Application {
         
         glClearColor(0.3f, 0.6f, 0.9f, 1.0f)
 
-        println(glGetString(GL_VENDOR))
-        println(glGetString(GL_RENDERER))
+        Log.log(glGetString(GL_VENDOR))
+        Log.log(glGetString(GL_RENDERER))
         
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_CULL_FACE)
