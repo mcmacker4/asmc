@@ -13,12 +13,14 @@ class VBO private constructor(id: Int, private val target: Int) : GLObject(id) {
     }
     
     fun write(data: IntArray) {
-        assert(boundBuffers[target] == id)
+        //assert(boundBuffers[target] == id)
+        bind()
         glBufferData(target, data, GL_STATIC_DRAW)
     }
     
     fun write(data: FloatArray) {
-        assert(boundBuffers[target] == id)
+        //assert(boundBuffers[target] == id)
+        bind()
         glBufferData(target, data, GL_STATIC_DRAW)
     }
 

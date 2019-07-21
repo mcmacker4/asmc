@@ -3,6 +3,7 @@ package com.mcmacker4.asmc
 import com.mcmacker4.asmc.block.Block
 import com.mcmacker4.asmc.block.BlockTexture
 import com.mcmacker4.asmc.block.BlockVertices
+import com.mcmacker4.asmc.block.Blocks
 import com.mcmacker4.asmc.engine.Application
 import com.mcmacker4.asmc.engine.Window
 import com.mcmacker4.asmc.engine.gl.GLTexture
@@ -29,6 +30,14 @@ class ASMC : Application() {
 
         var isWireframe = false
         var isCulling = true
+        
+        world = World()
+        
+        camera = Camera().apply {
+            position.set(0f, 0f, -1.5f)
+            rotation.y = Math.PI.toFloat()
+        }
+
         Input.onKeyDown {
             when (key) {
                 GLFW_KEY_F11 -> {
@@ -51,14 +60,10 @@ class ASMC : Application() {
                     if (isCulling) glEnable(GL_CULL_FACE)
                     else glDisable(GL_CULL_FACE)
                 }
+                GLFW_KEY_T -> {
+                    world.setBlock(0, 0, 0, Blocks.AIR)
+                }
             }
-        }
-        
-        world = World()
-        
-        camera = Camera().apply {
-            position.set(0f, 0f, -1.5f)
-            rotation.y = Math.PI.toFloat()
         }
         
     }

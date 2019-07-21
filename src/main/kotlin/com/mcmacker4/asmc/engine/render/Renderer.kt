@@ -15,30 +15,6 @@ object Renderer {
     
     private var program = GLProgram.load("default")
     
-//    private fun prepare(scene: Scene) {
-//        program.bind()
-//        scene.camera.let {
-//            program.uniformMatrix("viewMatrix", it.getViewMatrix())
-//            program.uniformMatrix("projectionMatrix", it.getProjectionMatrix())
-//        }
-//    }
-//    
-//    private fun render(entity: ModelEntity) {
-//        program.setTextureIndex("tex", 0)
-//        program.uniformMatrix("modelMatrix", entity.getModelMatrix())
-//        glActiveTexture(GL_TEXTURE0)
-//        glBindTexture(entity.model.texture.target, entity.model.texture.id)
-//        entity.model.render()
-//    }
-    
-//    fun render(scene: Scene) {
-//        prepare(scene)
-//        scene.modelEntities.forEach {
-//            render(it)
-//        }
-//        finalize()
-//    }
-    
     private val terrainTexture = GLTexture.load2D("terrain.png")
     
     private fun renderChunk(chunk: Chunk) {
