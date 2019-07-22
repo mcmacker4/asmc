@@ -12,6 +12,8 @@ abstract class Application {
     
     fun start() {
         
+        Log.log("Java version: ${System.getProperty("java.version")}")
+        
         GLFWErrorCallback.createPrint(System.err).set()
         
         if (!glfwInit())
@@ -44,6 +46,7 @@ abstract class Application {
             onUpdate(delta)
 
             Window.update()
+            Thread.yield()
         }
 
         onEnd()

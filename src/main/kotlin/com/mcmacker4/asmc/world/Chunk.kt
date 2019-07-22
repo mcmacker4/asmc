@@ -13,14 +13,14 @@ import org.lwjgl.system.MemoryUtil
 import java.nio.FloatBuffer
 
 
-class Chunk private constructor(val world: World, val blocks: Array<BlockID>, val xpos: Int, val zpos: Int) {
+class Chunk private constructor(val world: World, val blocks: Array<BlockID>, val pos: ChunkPos) {
     
     var vao: VAO = VAO.EMPTY
     var vertexCount: Int = 0
     
     private val mmBuffer: FloatBuffer = MemoryUtil.memAllocFloat(4*4)
     
-    fun updateVAO() = updateVAO(world.getNeighbouringChunks(xpos, zpos))
+    fun updateVAO() = updateVAO(world.getNeighbouringChunks(pos))
     
     fun updateVAO(neighbours: Array<Chunk?>? = null) {
         val positions = arrayListOf<Float>()
@@ -84,17 +84,22 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
     
     fun getBlockID(x: Int, y: Int, z: Int) : BlockID {
         if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT || z < 0 || z >= DEPTH)
-            return world.getBlockID(x + xpos * WIDTH, y, z * zpos * DEPTH)
+            return world.getBlockID(x + pos.xpos * WIDTH, y, z * pos.zpos * DEPTH)
         return blocks[x + y * WIDTH + z * WIDTH * HEIGHT]
     }
     
     fun getModelMatrix(): FloatBuffer {
         Matrix4f().identity()
-            .translate(xpos * WIDTH.toFloat(), 0f, zpos * DEPTH.toFloat())
+            .translate(pos.xpos * WIDTH.toFloat(), 0f, pos.zpos * DEPTH.toFloat())
             .get(mmBuffer)
         return mmBuffer
     }
-    
+
+    fun unload() {
+        vao.attributes.forEach { (_, vbo) -> vbo.delete() }
+        vao.delete()
+    }
+
     companion object {
         
         const val WIDTH = 8
@@ -105,17 +110,19 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
         
         private val noise = OpenSimplexNoise(1)
         
-        fun create(world: World, xpos: Int, zpos: Int) : Chunk {
+        fun create(world: World, pos: ChunkPos) : Chunk {
             val blocks = Array(WIDTH * HEIGHT * DEPTH) { Blocks.AIR }
             repeat(WIDTH) { i ->
                 repeat(DEPTH) { k ->
-                    val height = (noise.eval((i + xpos * WIDTH).toDouble() / FEATURE_SIZE, (k + zpos * DEPTH).toDouble() / FEATURE_SIZE) * 12 + 100).toInt()
+                    val height = (noise.eval(
+                        (i + pos.xpos * WIDTH).toDouble() / FEATURE_SIZE,
+                        (k + pos.zpos * DEPTH).toDouble() / FEATURE_SIZE
+                    ) * 12 + 100).toInt()
                     repeat(HEIGHT) { j ->
-                        
                         val cave = noise.eval(
-                            (i + xpos * WIDTH).toDouble() / FEATURE_SIZE,
+                            (i + pos.xpos * WIDTH).toDouble() / FEATURE_SIZE,
                             j.toDouble() / FEATURE_SIZE,
-                            (k + zpos * DEPTH).toDouble() / FEATURE_SIZE
+                            (k + pos.zpos * DEPTH).toDouble() / FEATURE_SIZE
                         )
                         blocks[i + j * WIDTH + k * WIDTH * HEIGHT] = when {
                             cave > 0.5 -> Blocks.AIR
@@ -128,7 +135,7 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
                     }
                 }
             }
-            return Chunk(world, blocks, xpos, zpos)
+            return Chunk(world, blocks, pos)
         }
         
     }

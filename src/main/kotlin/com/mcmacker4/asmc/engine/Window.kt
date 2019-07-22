@@ -76,7 +76,7 @@ object Window {
 
         //debugProc = GLUtil.setupDebugMessageCallback()
         
-        glfwSwapInterval(0)
+        glfwSwapInterval(1)
         
         glfwShowWindow(glfwWindow)
     }

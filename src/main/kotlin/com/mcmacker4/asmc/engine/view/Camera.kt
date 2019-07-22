@@ -37,6 +37,11 @@ class Camera(
             rotation.x -= dy.toFloat() * sensitivity
             rotation.x = rotation.x.clamp(-PI.toFloat() / 2, PI.toFloat() / 2)
         }
+        Input.onKeyDown {
+            if (key == GLFW_KEY_T) {
+                position += Vector3f(0f, 0f, -1f).rotateY(rotation.y) * 300f
+            }
+        }
     }
     
     fun getViewMatrix() : FloatBuffer {
