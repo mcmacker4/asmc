@@ -4,7 +4,7 @@ import java.time.LocalTime
 
 object Log {
 
-    fun log(msg: String?) {
+    fun log(msg: Any?) {
         val t = LocalTime.now()
         val h = t.hour.toString().padStart(2, '0')
         val m = t.minute.toString().padStart(2, '0')

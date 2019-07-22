@@ -16,3 +16,10 @@ operator fun Vector3f.minusAssign(other: Vector3f) { sub(other) }
 operator fun Vector3f.times(other: Float): Vector3f = mul(other, Vector3f())
 
 operator fun Vector3f.timesAssign(other: Float) { mul(other) }
+
+
+fun Float.clamp(min: Float, max: Float) = when {
+    this > max -> max
+    this < min -> min
+    else -> this
+}

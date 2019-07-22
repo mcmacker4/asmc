@@ -1,6 +1,7 @@
 package com.mcmacker4.asmc.engine.view
 
 import com.mcmacker4.asmc.engine.Window
+import com.mcmacker4.asmc.engine.extensions.clamp
 import com.mcmacker4.asmc.engine.extensions.plusAssign
 import com.mcmacker4.asmc.engine.extensions.times
 import com.mcmacker4.asmc.engine.extensions.unaryMinus
@@ -12,6 +13,7 @@ import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.system.MemoryUtil
 import java.lang.Math.toRadians
 import java.nio.FloatBuffer
+import kotlin.math.PI
 
 
 class Camera(
@@ -21,7 +23,8 @@ class Camera(
 ) : Entity() {
     
     companion object {
-        private const val speed = 2f
+        private const val speed = 5f
+        private const val shiftMult = 5f
         private const val sensitivity = 0.003f
     }
     
@@ -32,6 +35,7 @@ class Camera(
         Input.onMouseMoved {
             rotation.y -= dx.toFloat() * sensitivity
             rotation.x -= dy.toFloat() * sensitivity
+            rotation.x = rotation.x.clamp(-PI.toFloat() / 2, PI.toFloat() / 2)
         }
     }
     
@@ -66,9 +70,16 @@ class Camera(
             direction.y = -1f
         
         if (Input.isKeyDown(GLFW_KEY_LEFT_SHIFT))
-            direction *= 4f
+            direction *= shiftMult
         
         position += direction.rotateY(rotation.y) * speed * delta
     }
-    
+
+    fun getLookVector(): Vector3f {
+        return Vector3f(0f, 0f, -1f).apply {
+            rotateX(rotation.x)
+            rotateY(rotation.y)
+        }
+    }
+
 }

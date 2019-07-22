@@ -6,7 +6,6 @@ import com.mcmacker4.asmc.block.BlockVertices
 import com.mcmacker4.asmc.block.Blocks
 import com.mcmacker4.asmc.engine.gl.VAO
 import com.mcmacker4.asmc.engine.gl.VBO
-import com.mcmacker4.asmc.util.Log
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11.*
@@ -21,7 +20,9 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
     
     private val mmBuffer: FloatBuffer = MemoryUtil.memAllocFloat(4*4)
     
-    fun updateVAO(neighbours: Array<Chunk?>) {
+    fun updateVAO() = updateVAO(world.getNeighbouringChunks(xpos, zpos))
+    
+    fun updateVAO(neighbours: Array<Chunk?>? = null) {
         val positions = arrayListOf<Float>()
         val normals = arrayListOf<Float>()
         val uvs = arrayListOf<Float>()
@@ -61,11 +62,11 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
         }
     }
     
-    fun getBlock(x: Int, y: Int, z: Int, neighbours: Array<Chunk?>) : Block {
-        val north = neighbours[World.NORTH]
-        val south = neighbours[World.SOUTH]
-        val east = neighbours[World.EAST]
-        val west = neighbours[World.WEST]
+    fun getBlock(x: Int, y: Int, z: Int, neighbours: Array<Chunk?>?) : Block {
+        val north = neighbours?.get(World.NORTH)
+        val south = neighbours?.get(World.SOUTH)
+        val east = neighbours?.get(World.EAST)
+        val west = neighbours?.get(World.WEST)
         when {
             y < 0 -> return Blocks[Blocks.AIR]
             y >= HEIGHT -> return Blocks[Blocks.AIR]
@@ -78,9 +79,13 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
     }
     
     fun getBlock(x: Int, y: Int, z: Int) : Block {
+        return Blocks[getBlockID(x, y, z)]
+    }
+    
+    fun getBlockID(x: Int, y: Int, z: Int) : BlockID {
         if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT || z < 0 || z >= DEPTH)
-            return world.getBlock(x + xpos * WIDTH, y, z * zpos * DEPTH)
-        return Blocks[blocks[x + y * WIDTH + z * WIDTH * HEIGHT]]
+            return world.getBlockID(x + xpos * WIDTH, y, z * zpos * DEPTH)
+        return blocks[x + y * WIDTH + z * WIDTH * HEIGHT]
     }
     
     fun getModelMatrix(): FloatBuffer {
@@ -93,7 +98,7 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
     companion object {
         
         const val WIDTH = 8
-        const val HEIGHT = 64
+        const val HEIGHT = 128
         const val DEPTH = 8
         
         private const val FEATURE_SIZE = 24
@@ -104,12 +109,21 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
             val blocks = Array(WIDTH * HEIGHT * DEPTH) { Blocks.AIR }
             repeat(WIDTH) { i ->
                 repeat(DEPTH) { k ->
-                    val height = (noise.eval((i + xpos * WIDTH).toDouble() / FEATURE_SIZE, (k + zpos * DEPTH).toDouble() / FEATURE_SIZE) * 6 + 20).toInt()
+                    val height = (noise.eval((i + xpos * WIDTH).toDouble() / FEATURE_SIZE, (k + zpos * DEPTH).toDouble() / FEATURE_SIZE) * 12 + 100).toInt()
                     repeat(HEIGHT) { j ->
+                        
+                        val cave = noise.eval(
+                            (i + xpos * WIDTH).toDouble() / FEATURE_SIZE,
+                            j.toDouble() / FEATURE_SIZE,
+                            (k + zpos * DEPTH).toDouble() / FEATURE_SIZE
+                        )
                         blocks[i + j * WIDTH + k * WIDTH * HEIGHT] = when {
-                            j > height -> Blocks.AIR
-                            j == height -> Blocks.GRASS
-                            else -> Blocks.STONE
+                            cave > 0.5 -> Blocks.AIR
+                            else -> when {
+                                j > height -> Blocks.AIR
+                                j == height -> Blocks.GRASS
+                                else -> Blocks.STONE
+                            }
                         }
                     }
                 }
