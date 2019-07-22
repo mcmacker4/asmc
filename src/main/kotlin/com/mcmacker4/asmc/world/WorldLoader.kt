@@ -52,10 +52,6 @@ class WorldLoader(private val world: World) : Thread() {
         return loadQueue.contains(pos) || world.isChunkLoadedOrQueued(pos)
     }
     
-    private fun isChunkLoadedOrQueued(xpos: Int, ypos: Int) : Boolean {
-        return isChunkLoadedOrQueued(ChunkPos(xpos, ypos))
-    }
-    
     private fun findClosestUnloadedChunk() : ChunkPos? {
         val origin = world.getCurrentChunkPos()
         var n = 0; var d = 1
@@ -64,18 +60,22 @@ class WorldLoader(private val world: World) : Thread() {
         repeat(World.VIEW_RADIUS) {
             // Vertical
             for (i in -n..n) {
-                if (!isChunkLoadedOrQueued(origin.xpos + d, origin.zpos + i))
-                    return ChunkPos(origin.xpos + d, origin.zpos + i)
-                else if (!isChunkLoadedOrQueued(origin.xpos - d, origin.zpos + i))
-                    return ChunkPos(origin.xpos - d, origin.zpos + i)
+                var chunkPos = ChunkPos(origin.xpos + d, origin.zpos + i)
+                if (chunkPos.dist(origin) < World.CHUNK_MAX_DIST && !isChunkLoadedOrQueued(chunkPos))
+                    return chunkPos
+                chunkPos = ChunkPos(origin.xpos - d, origin.zpos + i)
+                if (chunkPos.dist(origin) < World.CHUNK_MAX_DIST && !isChunkLoadedOrQueued(chunkPos))
+                    return chunkPos
             }
             n++
             // Horizontal
             for (i in -n..n) {
-                if (!isChunkLoadedOrQueued(origin.xpos + i, origin.zpos + d))
-                    return ChunkPos(origin.xpos + i, origin.zpos + d)
-                else if (!isChunkLoadedOrQueued(origin.xpos + i, origin.zpos - d))
-                    return ChunkPos(origin.xpos + i, origin.zpos - d)
+                var chunkPos = ChunkPos(origin.xpos + i, origin.zpos + d)
+                if (chunkPos.dist(origin) < World.CHUNK_MAX_DIST && !isChunkLoadedOrQueued(chunkPos))
+                    return chunkPos
+                chunkPos = ChunkPos(origin.xpos + i, origin.zpos - d)
+                if (chunkPos.dist(origin) < World.CHUNK_MAX_DIST && !isChunkLoadedOrQueued(chunkPos))
+                    return chunkPos
             }
             d++
         }

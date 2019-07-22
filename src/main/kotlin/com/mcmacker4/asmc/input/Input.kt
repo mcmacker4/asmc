@@ -52,6 +52,8 @@ object Input {
     
     fun isKeyDown(key: Int) = glfwGetKey(Window.glfwWindow, key) == GLFW_PRESS
     
+    fun isMouseButtonDown(button: Int) = glfwGetMouseButton(Window.glfwWindow, button) == GLFW_PRESS
+    
     fun grabCursor() = glfwSetInputMode(
         Window.glfwWindow,
         GLFW_CURSOR,

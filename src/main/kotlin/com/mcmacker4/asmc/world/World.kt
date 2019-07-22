@@ -23,11 +23,6 @@ class World {
     
     init {
         WorldLoader(this).start()
-        Input.onMouseDown {
-            when (button) {
-                GLFW.GLFW_MOUSE_BUTTON_1 -> destructionRay()
-            }
-        }
         Input.onKeyDown {
             if (key == GLFW.GLFW_KEY_DELETE) {
                 chunks.clear()
@@ -39,6 +34,9 @@ class World {
     fun update(delta: Float) {
         
         camera.update(delta)
+        
+        if (Input.isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_1))
+            destructionRay()
 
         repeat(4) {
             val chunkToUnload = chunks.values.firstOrNull { it.pos.dist(getCurrentChunkPos()) > CHUNK_MAX_DIST }
@@ -124,10 +122,6 @@ class World {
             times++
         }
     }
-    
-    fun distanceToCamera(pos: ChunkPos) : Float {
-        return pos.delta(getCurrentChunkPos()).length()
-    }
 
     @Synchronized fun getCurrentChunkPos(): ChunkPos {
         return ChunkPos(
@@ -142,10 +136,6 @@ class World {
 
     @Synchronized fun isChunkLoadedOrQueued(pos: ChunkPos): Boolean {
         return isChunkLoaded(pos) || (pendingChunk?.let { it.pos == pos } ?: false)
-    }
-
-    fun isChunkLoadedOrQueued(xpos: Int, ypos: Int): Boolean {
-        return isChunkLoadedOrQueued(ChunkPos(xpos, ypos))
     }
     
     @Synchronized fun loadChunk(chunk: Chunk) {
