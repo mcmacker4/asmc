@@ -24,7 +24,7 @@ class Camera(
     
     companion object {
         private const val speed = 5f
-        private const val shiftMult = 5f
+        private const val shiftMult = 15f
         private const val sensitivity = 0.003f
     }
     

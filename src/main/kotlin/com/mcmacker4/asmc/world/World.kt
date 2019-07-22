@@ -10,24 +10,17 @@ import com.mcmacker4.asmc.util.mod
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import java.util.*
+import kotlin.math.PI
 import kotlin.math.sqrt
 
 
 class World {
 
-    private val camera = Camera().apply { position.set(0f, 120f, 0f) }
+    private val camera = Camera().apply { position.set(0f, 150f, 0f); rotation.set(-PI.toFloat(), 0f, 0f) }
     private val chunks = Collections.synchronizedMap(hashMapOf<ChunkPos, Chunk>())
     
-    private val loadQueue = PriorityQueue(LOAD_QUEUE_MAX, Comparator<Chunk> { c1, c2 ->
-        val d1 = distanceToCamera(c1.pos)
-        val d2 = distanceToCamera(c2.pos)
-        when {
-            d1 < d2 -> -1
-            d1 > d2 -> 1
-            else -> 0
-        }
-    })
-
+    private var pendingChunk: Chunk? = null
+    
     init {
         WorldLoader(this).start()
         Input.onMouseDown {
@@ -35,9 +28,16 @@ class World {
                 GLFW.GLFW_MOUSE_BUTTON_1 -> destructionRay()
             }
         }
+        Input.onKeyDown {
+            if (key == GLFW.GLFW_KEY_DELETE) {
+                chunks.clear()
+                pendingChunk = null
+            }
+        }
     }
 
     fun update(delta: Float) {
+        
         camera.update(delta)
 
         repeat(4) {
@@ -47,14 +47,13 @@ class World {
                 chunkToUnload.unload()
             }
         }
-
-        synchronized(loadQueue) {
-            if (loadQueue.isNotEmpty()) {
-                val chunk = loadQueue.remove()
-                chunks[chunk.pos] = chunk
-                chunk.updateVAO()
-            }
+        
+        pendingChunk?.let {
+            chunks[it.pos] = it
+            updateChunkAndNeighbours(it, arrayListOf(NORTH, SOUTH, EAST, WEST))
+            pendingChunk = null
         }
+        
     }
 
     private fun updateChunkAndNeighbours(chunk: Chunk, whichNeighbours: List<Int>? = null) {
@@ -126,11 +125,11 @@ class World {
         }
     }
     
-    private fun distanceToCamera(pos: ChunkPos) : Float {
+    fun distanceToCamera(pos: ChunkPos) : Float {
         return pos.delta(getCurrentChunkPos()).length()
     }
 
-    fun getCurrentChunkPos(): ChunkPos {
+    @Synchronized fun getCurrentChunkPos(): ChunkPos {
         return ChunkPos(
             camera.position.x.toInt() / Chunk.WIDTH,
             camera.position.z.toInt() / Chunk.DEPTH
@@ -141,26 +140,20 @@ class World {
         return chunks.containsKey(pos)
     }
 
-    fun isChunkLoadedOrQueued(pos: ChunkPos): Boolean {
-        synchronized(loadQueue) {
-            return isChunkLoaded(pos) || loadQueue.any { it.pos == pos }
-        }
+    @Synchronized fun isChunkLoadedOrQueued(pos: ChunkPos): Boolean {
+        return isChunkLoaded(pos) || (pendingChunk?.let { it.pos == pos } ?: false)
     }
 
     fun isChunkLoadedOrQueued(xpos: Int, ypos: Int): Boolean {
         return isChunkLoadedOrQueued(ChunkPos(xpos, ypos))
     }
     
-    fun addChunkToLoadQueue(chunk: Chunk) {
-        synchronized(loadQueue) {
-            loadQueue.add(chunk)
-        }
+    @Synchronized fun loadChunk(chunk: Chunk) {
+        this.pendingChunk = chunk
     }
     
-    fun canAddChunkToLoadQueue() : Boolean {
-        return synchronized(loadQueue) {
-            loadQueue.size < LOAD_QUEUE_MAX
-        }
+    @Synchronized fun canLoadChunk() : Boolean {
+        return this.pendingChunk == null
     }
     
     companion object {
@@ -168,8 +161,6 @@ class World {
         
         val CHUNK_MAX_DIST = sqrt(VIEW_RADIUS.toFloat() * VIEW_RADIUS + VIEW_RADIUS * VIEW_RADIUS) + 1
         
-        const val LOAD_QUEUE_MAX = 5
-
         const val NORTH = 0
         const val SOUTH = 1
         const val EAST = 2
