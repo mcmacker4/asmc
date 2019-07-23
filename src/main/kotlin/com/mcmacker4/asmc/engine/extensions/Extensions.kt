@@ -1,5 +1,6 @@
 package com.mcmacker4.asmc.engine.extensions
 
+import org.joml.Matrix4f
 import org.joml.Vector3f
 
 
@@ -16,6 +17,8 @@ operator fun Vector3f.minusAssign(other: Vector3f) { sub(other) }
 operator fun Vector3f.times(other: Float): Vector3f = mul(other, Vector3f())
 
 operator fun Vector3f.timesAssign(other: Float) { mul(other) }
+
+operator fun Matrix4f.times(other: Matrix4f): Matrix4f = mul(other, Matrix4f())
 
 
 fun Float.clamp(min: Float, max: Float) = when {

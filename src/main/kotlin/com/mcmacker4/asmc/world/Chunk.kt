@@ -102,11 +102,11 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
 
     companion object {
         
-        const val WIDTH = 8
-        const val HEIGHT = 128
-        const val DEPTH = 8
+        const val WIDTH = 16
+        const val HEIGHT = 256
+        const val DEPTH = 16
         
-        private const val FEATURE_SIZE = 24
+        private const val FEATURE_SIZE = 18
         
         private val noise = OpenSimplexNoise(1)
         
@@ -117,7 +117,7 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
                     val height = (noise.eval(
                         (i + pos.xpos * WIDTH).toDouble() / FEATURE_SIZE,
                         (k + pos.zpos * DEPTH).toDouble() / FEATURE_SIZE
-                    ) * 12 + 100).toInt()
+                    ) * 12 + 65).toInt()
                     repeat(HEIGHT) { j ->
                         val cave = noise.eval(
                             (i + pos.xpos * WIDTH).toDouble() / FEATURE_SIZE,

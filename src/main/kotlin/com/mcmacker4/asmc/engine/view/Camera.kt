@@ -44,20 +44,27 @@ class Camera(
         }
     }
     
-    fun getViewMatrix() : FloatBuffer {
+    fun getViewMatrix() : Matrix4f {
         return Matrix4f().apply {
             identity()
             rotateXYZ(-rotation)
             translate(-position)
-        }.get(viewMatrixBuffer)
+        }
     }
     
-    fun getProjectionMatrix() : FloatBuffer {
-        return Matrix4f()
-            .perspective(toRadians(fov.toDouble()).toFloat(), Window.aspect(), nearPlane, farPlane)
-            .get(projMatrixBuffer)
+    fun getViewMatrixBuffer() : FloatBuffer {
+        return getViewMatrix().get(viewMatrixBuffer)
     }
 
+    fun getProjectionMatrix() : Matrix4f {
+        return Matrix4f()
+            .perspective(toRadians(fov.toDouble()).toFloat(), Window.aspect(), nearPlane, farPlane)
+    }
+    
+    fun getProjectionMatrixBuffer() : FloatBuffer {
+        return getProjectionMatrix().get(projMatrixBuffer)
+    }
+    
     override fun update(delta: Float) {
         super.update(delta)
         var direction = Vector3f()

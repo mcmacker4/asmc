@@ -4,11 +4,9 @@ import com.mcmacker4.asmc.engine.gl.GLProgram
 import com.mcmacker4.asmc.engine.gl.GLTexture
 import com.mcmacker4.asmc.engine.view.Camera
 import com.mcmacker4.asmc.world.Chunk
-import org.joml.Matrix4f
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
-import org.lwjgl.system.MemoryUtil
 
 
 object Renderer {
@@ -32,8 +30,8 @@ object Renderer {
     }
     
     fun setCamera(camera: Camera) {
-        program.uniformMatrix("viewMatrix", camera.getViewMatrix())
-        program.uniformMatrix("projectionMatrix", camera.getProjectionMatrix())
+        program.uniformMatrix("viewMatrix", camera.getViewMatrixBuffer())
+        program.uniformMatrix("projectionMatrix", camera.getProjectionMatrixBuffer())
     }
     
     fun render(chunk: Chunk) {

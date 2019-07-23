@@ -5,7 +5,7 @@ import java.util.*
 class WorldLoader(private val world: World) : Thread() {
     
     companion object {
-        const val MAX_QUEUE_SIZE = 30
+        const val MAX_QUEUE_SIZE = World.VIEW_RADIUS * World.VIEW_RADIUS
     }
 
     private val loadQueue = ArrayList<ChunkPos>()
@@ -25,7 +25,13 @@ class WorldLoader(private val world: World) : Thread() {
             fillLoadQueue()
             
             if (world.canLoadChunk()) {
-                val chunkPos = loadQueue.minBy { it.dist(world.getCurrentChunkPos()) } ?: continue
+                val current = world.getCurrentChunkPos()
+                val chunkPos = loadQueue.minBy {
+                    // Prioritize visible chunks
+                    if (world.isChunkVisible(it))
+                        it.dist(current)
+                    else it.dist(current) * 2
+                } ?: continue
                 val chunk = Chunk.create(world, chunkPos)
                 world.loadChunk(chunk)
                 loadQueue.remove(chunkPos)

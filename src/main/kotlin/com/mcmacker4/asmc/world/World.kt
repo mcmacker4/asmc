@@ -6,7 +6,9 @@ import com.mcmacker4.asmc.engine.extensions.*
 import com.mcmacker4.asmc.engine.render.Renderer
 import com.mcmacker4.asmc.engine.view.Camera
 import com.mcmacker4.asmc.input.Input
+import com.mcmacker4.asmc.util.Log
 import com.mcmacker4.asmc.util.mod
+import org.joml.FrustumIntersection
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import java.util.*
@@ -38,11 +40,16 @@ class World {
         if (Input.isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_1))
             destructionRay()
 
+        val current = getCurrentChunkPos()
+        
+        val chunksWithDistToRemove = chunks.values.map {
+            Pair(it.pos.dist(current), it)
+        }.filter { it.first > CHUNK_MAX_DIST }
+        
         repeat(4) {
-            val chunkToUnload = chunks.values.firstOrNull { it.pos.dist(getCurrentChunkPos()) > CHUNK_MAX_DIST }
-            if (chunkToUnload != null) {
-                chunks.remove(chunkToUnload.pos)
-                chunkToUnload.unload()
+            chunksWithDistToRemove.maxBy { it.first }?.let { (_, chunk) ->
+                chunk.unload()
+                chunks.remove(chunk.pos)
             }
         }
         
@@ -52,6 +59,16 @@ class World {
             pendingChunk = null
         }
         
+    }
+
+    fun render() {
+        Renderer.init()
+        Renderer.setCamera(camera)
+        val visibleChunks = chunks.filter { isChunkVisible(it.key) }
+        visibleChunks.forEach {
+            Renderer.render(it.value)
+        }
+        Renderer.finalize()
     }
 
     private fun updateChunkAndNeighbours(chunk: Chunk, whichNeighbours: List<Int>? = null) {
@@ -70,15 +87,6 @@ class World {
             chunks[ChunkPos(pos.xpos - 1, pos.zpos)],
             chunks[ChunkPos(pos.xpos + 1, pos.zpos)]
         )
-    }
-
-    fun render() {
-        Renderer.init()
-        Renderer.setCamera(camera)
-        chunks.forEach { (_, chunk) ->
-            Renderer.render(chunk)
-        }
-        Renderer.finalize()
     }
 
     fun getBlockID(x: Int, y: Int, z: Int): BlockID {
@@ -144,6 +152,12 @@ class World {
     
     @Synchronized fun canLoadChunk() : Boolean {
         return this.pendingChunk == null
+    }
+    
+    fun isChunkVisible(pos: ChunkPos): Boolean {
+        val p0 = Vector3f(pos.xpos.toFloat() * Chunk.WIDTH, 0f, pos.zpos.toFloat() * Chunk.DEPTH)
+        val p1 = p0 + Vector3f(Chunk.WIDTH.toFloat(), Chunk.HEIGHT.toFloat(), Chunk.DEPTH.toFloat())
+        return FrustumIntersection(camera.getProjectionMatrix() * camera.getViewMatrix()).testAab(p0, p1)
     }
     
     companion object {
