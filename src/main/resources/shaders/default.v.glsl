@@ -14,7 +14,9 @@ uniform mat4 projectionMatrix;
 const vec3 sundir = normalize(vec3(0.6, 1, 0.2));
 
 void main() {
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
+    
     _uvcoords = uvcoords;
     _bright = mix(0.55, 1.0, dot(sundir, normal));
 }

@@ -7,8 +7,7 @@ import com.mcmacker4.asmc.engine.extensions.times
 import com.mcmacker4.asmc.engine.extensions.unaryMinus
 import com.mcmacker4.asmc.engine.scene.Entity
 import com.mcmacker4.asmc.input.Input
-import org.joml.Matrix4f
-import org.joml.Vector3f
+import org.joml.*
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.system.MemoryUtil
 import java.lang.Math.toRadians
@@ -28,8 +27,18 @@ class Camera(
         private const val sensitivity = 0.003f
     }
     
+    private val viewMatrix = Matrix4f().apply {
+        identity()
+        rotateXYZ(-rotation)
+        translate(-position)
+    }
+    private val projectionMatrix = Matrix4f().identity().perspective(toRadians(fov.toDouble()).toFloat(),
+        Window.aspect(), nearPlane, farPlane)
+    
     private val viewMatrixBuffer = MemoryUtil.memAllocFloat(4*4)
     private val projMatrixBuffer = MemoryUtil.memAllocFloat(4*4)
+    
+    private val frustumIntersection = FrustumIntersection(projectionMatrix * viewMatrix)
     
     init {
         Input.onMouseMoved {
@@ -44,25 +53,12 @@ class Camera(
         }
     }
     
-    fun getViewMatrix() : Matrix4f {
-        return Matrix4f().apply {
-            identity()
-            rotateXYZ(-rotation)
-            translate(-position)
-        }
-    }
-    
     fun getViewMatrixBuffer() : FloatBuffer {
-        return getViewMatrix().get(viewMatrixBuffer)
+        return viewMatrix.get(viewMatrixBuffer)
     }
 
-    fun getProjectionMatrix() : Matrix4f {
-        return Matrix4f()
-            .perspective(toRadians(fov.toDouble()).toFloat(), Window.aspect(), nearPlane, farPlane)
-    }
-    
     fun getProjectionMatrixBuffer() : FloatBuffer {
-        return getProjectionMatrix().get(projMatrixBuffer)
+        return projectionMatrix.get(projMatrixBuffer)
     }
     
     override fun update(delta: Float) {
@@ -85,6 +81,17 @@ class Camera(
             direction *= shiftMult
         
         position += direction.rotateY(rotation.y) * speed * delta
+        
+        viewMatrix.apply {
+            identity()
+            rotateXYZ(-rotation)
+            translate(-position)
+        }
+        
+        projectionMatrix.identity().perspective(toRadians(fov.toDouble()).toFloat(),
+            Window.aspect(), nearPlane, farPlane)
+        
+        frustumIntersection.set(projectionMatrix * viewMatrix)
     }
 
     fun getLookVector(): Vector3f {
@@ -92,6 +99,10 @@ class Camera(
             rotateX(rotation.x)
             rotateY(rotation.y)
         }
+    }
+
+    fun checkFrustumAab(p0: Vector3fc, p1: Vector3fc): Boolean {
+        return frustumIntersection.testAab(p0, p1)
     }
 
 }

@@ -23,20 +23,18 @@ class WorldLoader(private val world: World) : Thread() {
 
             discardQueueItems()
             fillLoadQueue()
-            
-            if (world.canLoadChunk()) {
-                val current = world.getCurrentChunkPos()
+
+            val current = world.getCurrentChunkPos()
+            for (i in 1..world.pendingChunkSlotsAvailable()) {
                 val chunkPos = loadQueue.minBy {
                     // Prioritize visible chunks
                     if (world.isChunkVisible(it))
                         it.dist(current)
-                    else it.dist(current) * 2
-                } ?: continue
-                val chunk = Chunk.create(world, chunkPos)
-                world.loadChunk(chunk)
+                    else it.dist(current) * 1.5f
+                } ?: break
                 loadQueue.remove(chunkPos)
+                world.loadChunk(Chunk.create(world, chunkPos))
             }
-            
         }
         
     }

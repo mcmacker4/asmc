@@ -2,12 +2,18 @@ package com.mcmacker4.asmc.engine.gl
 
 import com.mcmacker4.asmc.engine.exceptions.ShaderLinkException
 import com.mcmacker4.asmc.engine.exceptions.ShaderValidateException
+import org.joml.Vector3fc
 import org.lwjgl.opengl.GL11.GL_FALSE
 import org.lwjgl.opengl.GL20.*
 import java.nio.FloatBuffer
 
 
 class GLProgram private constructor(id: Int) : GLObject(id) {
+    
+    fun uniformVec3(name: String, v: Vector3fc) {
+        val loc = glGetUniformLocation(id, name)
+        glUniform3f(loc, v.x(), v.y(), v.z())
+    }
     
     fun uniformMatrix(name: String, matrix: FloatBuffer) {
         val loc = glGetUniformLocation(id, name)

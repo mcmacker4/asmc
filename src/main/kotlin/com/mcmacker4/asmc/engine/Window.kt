@@ -8,7 +8,6 @@ import com.mcmacker4.asmc.util.Log
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.glViewport
-import org.lwjgl.opengl.GLUtil
 import org.lwjgl.system.Callback
 import org.lwjgl.system.MemoryUtil.NULL
 
@@ -74,8 +73,6 @@ object Window {
         glfwSetMouseButtonCallback(glfwWindow, ::onMouseButtonEvent)
         glfwSetCursorPosCallback(glfwWindow, ::onMouseCursorEvent)
 
-        //debugProc = GLUtil.setupDebugMessageCallback()
-        
         glfwSwapInterval(1)
         
         glfwShowWindow(glfwWindow)

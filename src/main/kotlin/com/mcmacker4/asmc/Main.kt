@@ -2,7 +2,7 @@ package com.mcmacker4.asmc
 
 import com.mcmacker4.asmc.engine.Application
 import com.mcmacker4.asmc.engine.Window
-import com.mcmacker4.asmc.engine.view.Camera
+import com.mcmacker4.asmc.engine.render.Renderer
 import com.mcmacker4.asmc.input.Input
 import com.mcmacker4.asmc.world.World
 import org.lwjgl.glfw.GLFW.*
@@ -11,8 +11,8 @@ import org.lwjgl.opengl.GL11.*
 
 class ASMC : Application() {
     
-    lateinit var camera: Camera
-    lateinit var world: World
+    private lateinit var world: World
+    
     override fun onInit() {
         
         Input.grabCursor()
@@ -21,11 +21,6 @@ class ASMC : Application() {
         var isCulling = true
         
         world = World()
-        
-        camera = Camera().apply {
-            position.set(0f, 0f, -1.5f)
-            rotation.y = Math.PI.toFloat()
-        }
 
         Input.onKeyDown {
             when (key) {
@@ -55,9 +50,8 @@ class ASMC : Application() {
     }
 
     override fun onUpdate(delta: Float) {
-        camera.update(delta)
         world.update(delta)
-        world.render()
+        Renderer.render(world)
     }
 
     override fun onEnd() {}

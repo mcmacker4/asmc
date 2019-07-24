@@ -3,32 +3,30 @@ package com.mcmacker4.asmc.world
 import com.mcmacker4.asmc.block.BlockID
 import com.mcmacker4.asmc.block.Blocks
 import com.mcmacker4.asmc.engine.extensions.*
-import com.mcmacker4.asmc.engine.render.Renderer
 import com.mcmacker4.asmc.engine.view.Camera
 import com.mcmacker4.asmc.input.Input
-import com.mcmacker4.asmc.util.Log
 import com.mcmacker4.asmc.util.mod
-import org.joml.FrustumIntersection
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import java.util.*
-import kotlin.math.PI
 import kotlin.math.sqrt
 
 
 class World {
 
-    private val camera = Camera().apply { position.set(0f, 150f, 0f); rotation.set(-PI.toFloat(), 0f, 0f) }
-    private val chunks = Collections.synchronizedMap(hashMapOf<ChunkPos, Chunk>())
+    val camera = Camera().apply { position.set(0f, 100f, 0f) }
+    val chunks: MutableMap<ChunkPos, Chunk> = Collections.synchronizedMap(hashMapOf<ChunkPos, Chunk>())
     
-    private var pendingChunk: Chunk? = null
+    private var pendingChunks = ArrayDeque<Chunk>(2)
     
     init {
         WorldLoader(this).start()
         Input.onKeyDown {
             if (key == GLFW.GLFW_KEY_DELETE) {
                 chunks.clear()
-                pendingChunk = null
+                synchronized(pendingChunks) {
+                    pendingChunks.clear()
+                }
             }
         }
     }
@@ -53,22 +51,14 @@ class World {
             }
         }
         
-        pendingChunk?.let {
-            chunks[it.pos] = it
-            updateChunkAndNeighbours(it, arrayListOf(NORTH, SOUTH, EAST, WEST))
-            pendingChunk = null
+        synchronized(pendingChunks) {
+            if (pendingChunks.isNotEmpty()) {
+                val chunk = pendingChunks.remove()
+                chunks[chunk.pos] = chunk
+                updateChunkAndNeighbours(chunk, arrayListOf(NORTH, SOUTH, EAST, WEST))
+            }
         }
         
-    }
-
-    fun render() {
-        Renderer.init()
-        Renderer.setCamera(camera)
-        val visibleChunks = chunks.filter { isChunkVisible(it.key) }
-        visibleChunks.forEach {
-            Renderer.render(it.value)
-        }
-        Renderer.finalize()
     }
 
     private fun updateChunkAndNeighbours(chunk: Chunk, whichNeighbours: List<Int>? = null) {
@@ -142,26 +132,28 @@ class World {
         return chunks.containsKey(pos)
     }
 
-    @Synchronized fun isChunkLoadedOrQueued(pos: ChunkPos): Boolean {
-        return isChunkLoaded(pos) || (pendingChunk?.let { it.pos == pos } ?: false)
+    fun isChunkLoadedOrQueued(pos: ChunkPos): Boolean {
+        return isChunkLoaded(pos) || synchronized(pendingChunks) { pendingChunks.any { it.pos == pos } }
     }
     
-    @Synchronized fun loadChunk(chunk: Chunk) {
-        this.pendingChunk = chunk
+    fun loadChunk(chunk: Chunk) {
+        synchronized(pendingChunks) {
+            pendingChunks.add(chunk)
+        }
     }
     
-    @Synchronized fun canLoadChunk() : Boolean {
-        return this.pendingChunk == null
+    fun pendingChunkSlotsAvailable() : Int {
+        return synchronized(pendingChunks) { 4 - pendingChunks.size }
     }
     
     fun isChunkVisible(pos: ChunkPos): Boolean {
         val p0 = Vector3f(pos.xpos.toFloat() * Chunk.WIDTH, 0f, pos.zpos.toFloat() * Chunk.DEPTH)
         val p1 = p0 + Vector3f(Chunk.WIDTH.toFloat(), Chunk.HEIGHT.toFloat(), Chunk.DEPTH.toFloat())
-        return FrustumIntersection(camera.getProjectionMatrix() * camera.getViewMatrix()).testAab(p0, p1)
+        return camera.checkFrustumAab(p0, p1)
     }
     
     companion object {
-        const val VIEW_RADIUS = 16
+        const val VIEW_RADIUS = 24
         
         val CHUNK_MAX_DIST = sqrt(VIEW_RADIUS.toFloat() * VIEW_RADIUS + VIEW_RADIUS * VIEW_RADIUS) + 1
         
