@@ -13,10 +13,13 @@ import org.lwjgl.system.MemoryUtil
 import java.nio.FloatBuffer
 
 
-class Chunk private constructor(val world: World, val blocks: Array<BlockID>, val pos: ChunkPos) {
+class Chunk private constructor(private val world: World, private val blocks: Array<BlockID>, val pos: ChunkPos) {
     
     var vao: VAO = VAO.EMPTY
     var vertexCount: Int = 0
+    
+    var maxHeight: Int = 0
+            private set
     
     private val mmBuffer: FloatBuffer = MemoryUtil.memAllocFloat(4*4)
     
@@ -31,6 +34,8 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
                 repeat(WIDTH) { i ->
                     val pos = Vector3f(i.toFloat(), j.toFloat(), k.toFloat())
                     getBlock(i, j, k, neighbours).texture?.let { texture ->
+                        if (j > maxHeight)
+                            maxHeight = j
                         if (getBlock(i, j + 1, k, neighbours).translucent)
                             BlockVertices.addUp(positions, normals, uvs, pos, texture)
                         if (getBlock(i, j - 1, k, neighbours).translucent)
@@ -75,7 +80,7 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
             z < 0 -> return south?.getBlock(x, y, z + DEPTH) ?: Blocks[Blocks.AIR]
             z >= WIDTH -> return north?.getBlock(x, y, z - DEPTH) ?: Blocks[Blocks.AIR]
         }
-        return Blocks[blocks[x + y * WIDTH + z * WIDTH * HEIGHT]]
+        return Blocks[blocks[x + z * WIDTH + y * WIDTH * DEPTH]]
     }
     
     fun getBlock(x: Int, y: Int, z: Int) : Block {
@@ -85,7 +90,11 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
     fun getBlockID(x: Int, y: Int, z: Int) : BlockID {
         if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT || z < 0 || z >= DEPTH)
             return world.getBlockID(x + pos.xpos * WIDTH, y, z * pos.zpos * DEPTH)
-        return blocks[x + y * WIDTH + z * WIDTH * HEIGHT]
+        return blocks[x + z * WIDTH + y * WIDTH * DEPTH]
+    }
+    
+    fun setBlock(x: Int, y: Int, z: Int, type: BlockID) {
+        blocks[x + z * WIDTH + y * WIDTH * DEPTH] = type
     }
     
     fun getModelMatrix(): FloatBuffer {
@@ -94,7 +103,7 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
             .get(mmBuffer)
         return mmBuffer
     }
-
+    
     fun unload() {
         vao.attributes.forEach { (_, vbo) -> vbo.delete() }
         vao.delete()
@@ -124,7 +133,7 @@ class Chunk private constructor(val world: World, val blocks: Array<BlockID>, va
                             j.toDouble() / FEATURE_SIZE,
                             (k + pos.zpos * DEPTH).toDouble() / FEATURE_SIZE
                         )
-                        blocks[i + j * WIDTH + k * WIDTH * HEIGHT] = when {
+                        blocks[i + k * WIDTH + j * WIDTH * DEPTH] = when {
                             cave > 0.5 -> Blocks.AIR
                             else -> when {
                                 j > height -> Blocks.AIR

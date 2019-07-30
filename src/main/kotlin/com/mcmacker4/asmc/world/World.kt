@@ -96,7 +96,7 @@ class World {
         val cz = z / Chunk.DEPTH
         val chunk = chunks[ChunkPos(cx, cz)]
         if (chunk != null) {
-            chunk.blocks[bx + y * Chunk.WIDTH + bz * Chunk.WIDTH * Chunk.HEIGHT] = type
+            chunk.setBlock(bx, y, bz, type)
             val which = arrayListOf<Int>()
             if (bx == 0) which.add(EAST)
             if (bx == Chunk.WIDTH - 1) which.add(WEST)
@@ -147,8 +147,9 @@ class World {
     }
     
     fun isChunkVisible(pos: ChunkPos): Boolean {
+        val chunk = chunks[pos] ?: return false
         val p0 = Vector3f(pos.xpos.toFloat() * Chunk.WIDTH, 0f, pos.zpos.toFloat() * Chunk.DEPTH)
-        val p1 = p0 + Vector3f(Chunk.WIDTH.toFloat(), Chunk.HEIGHT.toFloat(), Chunk.DEPTH.toFloat())
+        val p1 = p0 + Vector3f(Chunk.WIDTH.toFloat(), chunk.maxHeight.toFloat(), Chunk.DEPTH.toFloat())
         return camera.checkFrustumAab(p0, p1)
     }
     
